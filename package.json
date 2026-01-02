@@ -1,0 +1,218 @@
+{
+    "name": "assetlens",
+    "displayName": "AssetLens",
+    "description": "多媒体/字体资源悬停预览、引用分析与侧边栏管理工具。Asset preview, reference finder, and resource manager for images, fonts, media files.",
+    "version": "0.1.0",
+    "publisher": "assetlens",
+    "icon": "icon.png",
+    "engines": {
+      "vscode": "^1.90.0"
+    },
+    "categories": [
+      "Programming Languages",
+      "Other"
+    ],
+    "keywords": [
+      "asset",
+      "image",
+      "font",
+      "preview",
+      "media",
+      "resource",
+      "reference",
+      "finder",
+      "inspector",
+      "css",
+      "svg",
+      "png",
+      "jpg",
+      "webp",
+      "mp4",
+      "video",
+      "audio"
+    ],
+    "activationEvents": [
+      "*"
+    ],
+    "main": "./out/extension.js",
+    "galleryBanner": {
+      "color": "#1e1e1e",
+      "theme": "dark"
+    },
+    "contributes": {
+      "viewsContainers": {
+        "activitybar": [
+          {
+            "id": "assetlens",
+            "title": "AssetLens",
+            "icon": "resources/assetlens-icon-dark.svg"
+          }
+        ]
+      },
+      "commands": [
+        {
+          "command": "assetLens.refreshIndexes",
+          "title": "AssetLens: 重新扫描资源索引"
+        },
+        {
+          "command": "assetLens.manualRefresh",
+          "title": "AssetLens: 手动刷新资源索引",
+          "icon": "$(refresh)"
+        },
+        {
+          "command": "assetLens.previewFontInSidebar",
+          "title": "字体预览"
+        },
+        {
+          "command": "assetLens.findReferences",
+          "title": "AssetLens: 查找资源引用"
+        },
+        {
+          "command": "assetLens.openReference",
+          "title": "AssetLens: 打开引用位置"
+        },
+        {
+          "command": "assetLens.showImageGallery",
+          "title": "AssetLens: 查看静态资源",
+          "icon": "$(file-media)"
+        },
+        {
+          "command": "assetLens.openImagesSidebar",
+          "title": "AssetLens: 打开静态资源（侧边栏）"
+        }
+      ],
+      "keybindings": [
+        {
+          "command": "assetLens.showImageGallery",
+          "key": "ctrl+alt+a",
+          "mac": "cmd+alt+a",
+          "when": "true"
+        },
+        {
+          "command": "assetLens.manualRefresh",
+          "key": "ctrl+r",
+          "mac": "cmd+r",
+          "when": "true"
+        }
+      ],
+      "views": {
+        "assetlens": [
+          {
+            "id": "assetLens.imagesView",
+            "type": "webview",
+            "name": "静态资源"
+          }
+        ],
+        "explorer": [
+          {
+            "id": "assetLens.referencesView",
+            "name": "资源引用"
+          }
+        ]
+      },
+      "menus": {
+        "explorer/context": [
+          {
+            "command": "assetLens.findReferences",
+            "group": "navigation@10",
+            "when": "resourceLangId != markdown"
+          },
+          {
+            "command": "assetLens.previewFontInSidebar",
+            "group": "navigation@5",
+            "when": "resourceExtname =~ /\\.(ttf|otf|woff|woff2)$/i"
+          }
+        ],
+        "view/title": [
+          {
+            "command": "assetLens.manualRefresh",
+            "when": "view == assetLens.imagesView",
+            "group": "navigation"
+          }
+        ]
+      },
+      "configuration": {
+        "type": "object",
+        "title": "AssetLens 配置",
+        "properties": {
+          "assetLens.scanInclude": {
+            "type": "array",
+            "default": [
+              "**/*"
+            ],
+            "description": "参与资源扫描的 glob 列表。"
+          },
+          "assetLens.scanExclude": {
+            "type": "array",
+            "default": [
+              "**/node_modules/**",
+              "**/.git/**",
+              "**/dist/**",
+              "**/build/**"
+            ],
+            "description": "资源扫描排除的 glob 列表。"
+          },
+          "assetLens.maxInlinePreviewKB": {
+            "type": "number",
+            "default": 256,
+            "description": "悬停内联预览的最大文件大小（KB）。"
+          },
+          "assetLens.fontPreviewText": {
+            "type": "string",
+            "default": "字体预览 Font Preview 示例文本",
+            "description": "字体悬停预览使用的默认文本。"
+          },
+          "assetLens.unusedDecoration.enable": {
+            "type": "boolean",
+            "default": true,
+            "description": "是否在资源管理器中将未被引用的静态资源文件名颜色变浅显示（死代码标记）。"
+          }
+        }
+      }
+    },
+    "scripts": {
+      "compile": "tsc -p ./",
+      "watch": "tsc -watch -p ./",
+      "watch:no-op": "echo no-op",
+      "dev:gui": "cd GUI && npm run dev",
+      "build:gui": "cd GUI && npm run build",
+      "prebuild": "npm run build:gui",
+      "vscode:prepublish": "npm run prebuild && npm run compile"
+    },
+    "dependencies": {
+      "@mdn/browser-compat-data": "^5.6.3",
+      "@napi-rs/canvas": "^0.1.84",
+      "fast-glob": "^3.3.2",
+      "ffprobe-static": "^3.1.0",
+      "fluent-ffmpeg": "^2.1.2",
+      "fontkit": "^2.0.2",
+      "image-size": "^1.1.1",
+      "lru-cache": "^10.2.0",
+      "postcss": "^8.4.35",
+      "postcss-safe-parser": "^7.0.1",
+      "sharp": "^0.34.5",
+      "simple-git": "^3.27.0",
+      "vscode-uri": "^3.0.8"
+    },
+    "devDependencies": {
+      "@types/chai": "^5.2.3",
+      "@types/mocha": "^10.0.10",
+      "@types/node": "^20.11.19",
+      "@types/sinon": "^21.0.0",
+      "@types/vscode": "^1.90.0",
+      "@vscode/test-electron": "^2.5.2",
+      "chai": "^6.2.2",
+      "mocha": "^11.7.5",
+      "sinon": "^21.0.1",
+      "typescript": "^5.3.3"
+    },
+    "license": "MIT",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/YOUR_USERNAME/assetlens.git"
+    },
+    "bugs": {
+      "url": "https://github.com/YOUR_USERNAME/assetlens/issues"
+    },
+    "homepage": "https://github.com/YOUR_USERNAME/assetlens#readme"
+  }

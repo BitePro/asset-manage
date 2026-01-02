@@ -1,0 +1,837 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  body {
+    font-family: var(--vscode-font-family);
+    font-size: 13px;
+    color: var(--vscode-foreground);
+    background: var(--vscode-editor-background);
+    padding: 0;
+    overflow-x: hidden;
+  }
+  
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  /* Header */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--vscode-editor-background);
+    border-bottom: 1px solid var(--vscode-panel-border);
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  
+  .title {
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .stat-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  
+  .pill {
+    background: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+  }
+  
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  
+  /* Search */
+  .search-container {
+    padding: 12px 16px;
+    background: var(--vscode-editor-background);
+    border-bottom: 1px solid var(--vscode-panel-border);
+  }
+  
+  .search-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--vscode-input-background);
+    border: 1px solid var(--vscode-input-border);
+    border-radius: 6px;
+    padding: 6px 8px;
+    gap: 6px;
+    transition: border-color 0.2s;
+  }
+  
+  .search-wrapper:focus-within {
+    border-color: var(--vscode-focusBorder);
+  }
+  
+  .search-icon {
+    font-size: 14px;
+    color: var(--vscode-descriptionForeground);
+    user-select: none;
+  }
+  
+  .search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    color: var(--vscode-input-foreground);
+    font-size: 13px;
+    outline: none;
+    min-width: 0;
+  }
+  
+  .search-input::placeholder {
+    color: var(--vscode-input-placeholderForeground);
+  }
+  
+  .clear-btn {
+    background: none;
+    border: none;
+    color: var(--vscode-descriptionForeground);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px;
+    border-radius: 2px;
+    display: none;
+    transition: all 0.2s;
+  }
+  
+  .clear-btn:hover {
+    background: var(--vscode-toolbar-hoverBackground);
+    color: var(--vscode-foreground);
+  }
+  
+  .clear-btn.visible {
+    display: block;
+  }
+  
+  .search-results {
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+    min-height: 16px;
+  }
+  
+  /* Buttons */
+  .btn {
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  
+  .btn.secondary {
+    background: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+  }
+  
+  .btn:hover {
+    background: var(--vscode-button-hoverBackground);
+  }
+  
+  .btn.loading {
+    opacity: 0.75;
+    cursor: wait;
+  }
+  
+  .btn-link {
+    background: none;
+    border: none;
+    color: var(--vscode-textLink-foreground);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+  }
+  
+  /* TabBar */
+  .tabbar {
+    position: sticky;
+    top: 62px;
+    z-index: 90;
+    display: flex;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--vscode-editor-background);
+    border-bottom: 1px solid var(--vscode-panel-border);
+  }
+  
+  .tab {
+    padding: 8px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--vscode-panel-border);
+    background: var(--vscode-sideBar-background);
+    color: var(--vscode-foreground);
+    cursor: pointer;
+    font-size: 12px;
+  }
+  
+  .tab.active {
+    border-color: var(--vscode-focusBorder);
+    background: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+  }
+  
+  /* Panels */
+  .panels {
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .panel {
+    padding: 16px;
+    display: none;
+  }
+  
+  .panel.active {
+    display: block;
+  }
+  
+  /* Folder Groups */
+  .folder-group {
+    margin-bottom: 28px;
+  }
+  
+  .folder-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: var(--vscode-sideBarSectionHeader-background);
+    border-left: 3px solid var(--vscode-focusBorder);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .folder-header:hover {
+    background: var(--vscode-sideBarSectionHeader-background);
+    opacity: 0.8;
+  }
+  
+  .folder-toggle {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+    transition: transform 0.2s;
+    user-select: none;
+  }
+  
+  .folder-group.collapsed .folder-toggle {
+    transform: rotate(-90deg);
+  }
+  
+  .folder-group.collapsed .gallery,
+  .folder-group.collapsed .media-grid,
+  .folder-group.collapsed .font-grid,
+  .folder-group.collapsed .office-grid,
+  .folder-group.collapsed .other-grid {
+    display: none;
+  }
+  
+  .folder-name {
+    font-weight: 600;
+    flex: 1;
+  }
+  
+  .folder-count,
+  .media-meta,
+  .font-meta,
+  .other-meta {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+  }
+  
+  /* Gallery (Images) */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    gap: 10px;
+  }
+  
+  .card {
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--vscode-sideBar-background);
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: var(--vscode-focusBorder);
+  }
+  
+  .img-container {
+    width: 100%;
+    height: 78px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: repeating-conic-gradient(rgba(128, 128, 128, 0.08) 0% 25%, transparent 0% 50%) 50% / 10px 10px;
+    overflow: hidden;
+  }
+  
+  .img-container img {
+    max-width: 100%;
+    max-height: 100%;
+    min-width: 50px;
+    min-height: 50px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+  }
+  
+  .card:hover img {
+    transform: scale(1.05);
+  }
+  
+  .card-info {
+    padding: 8px;
+  }
+  
+  .file-name {
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .file-name:hover {
+    color: var(--vscode-textLink-foreground);
+  }
+  
+  .file-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    color: var(--vscode-descriptionForeground);
+  }
+  
+  .file-ext {
+    background: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  
+  .card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .card-actions .btn {
+    flex: 1;
+    min-width: 120px;
+  }
+  
+  /* Media Grid */
+  .media-grid,
+  .font-grid,
+  .other-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  
+  .media-card,
+  .font-card,
+  .other-card {
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--vscode-sideBar-background);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .media-preview video,
+  .media-preview audio {
+    width: 100%;
+    border-radius: 6px;
+    background: var(--vscode-editor-background);
+  }
+  
+  .media-title,
+  .font-title,
+  .other-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--vscode-foreground);
+  }
+  
+  .badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--vscode-badge-background);
+    color: var(--vscode-badge-foreground);
+  }
+  
+  .muted {
+    color: var(--vscode-descriptionForeground);
+    font-size: 12px;
+  }
+  
+  /* Font Section */
+  .font-family {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+    font-weight: normal;
+    margin-bottom: 8px;
+  }
+  
+  .font-preview {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px dashed var(--vscode-panel-border);
+    background: var(--vscode-editor-background);
+    line-height: 1.4;
+    word-break: break-word;
+    white-space: pre-wrap;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  
+  .font-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .font-size-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+  }
+  
+  .font-size-control input[type="range"] {
+    width: 140px;
+    accent-color: #4da3ff;
+  }
+  
+  .font-size-value {
+    min-width: 44px;
+    text-align: right;
+  }
+  
+  /* Office Section */
+  .office-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+  
+  .office-card {
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 8px;
+    padding: 12px;
+    background: var(--vscode-sideBar-background);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .office-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--vscode-foreground);
+  }
+  
+  .office-type {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+    font-style: italic;
+  }
+  
+  .office-meta {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground);
+  }
+  
+  .pdf-preview-container {
+    width: 90%;
+    height: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+  
+  .pdf-preview-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+  
+  /* Other Section */
+  .other-path {
+    word-break: break-all;
+  }
+  
+  /* Empty State */
+  .empty {
+    padding: 32px 18px;
+    border: 1px dashed var(--vscode-panel-border);
+    border-radius: 8px;
+    text-align: center;
+    color: var(--vscode-descriptionForeground);
+    background: var(--vscode-sideBar-background);
+  }
+  
+  /* Preview Overlay */
+  .preview-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    --preview-bg: rgba(0, 0, 0, 0.9);
+    background: var(--preview-bg);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+  }
+  
+  .preview-overlay.active {
+    display: flex;
+  }
+  
+  .preview-image {
+    max-width: 90%;
+    max-height: 90%;
+    min-width: 70%;
+    min-height: 70%;
+    object-fit: contain;
+    border-radius: 8px;
+    /* box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); */
+  }
+  
+  .preview-info {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  
+  .preview-header {
+    position: fixed;
+    top: 20px;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  /* 背景颜色控制器 */
+  .preview-bg-control {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    user-select: none;
+    z-index: 1001;
+  }
+  
+  .preview-close {
+    margin-right: 18px;
+  }
+  
+  .preview-bg-control .control-label {
+    font-size: 13px;
+    opacity: 0.9;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+  
+  .preview-bg-control .control-icon {
+    font-size: 18px;
+    opacity: 0.8;
+  }
+  
+  .preview-bg-control .bg-slider {
+    width: 150px;
+    height: 6px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(to right, #000, #fff);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+  
+  .preview-bg-control .bg-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s ease;
+  }
+  
+  .preview-bg-control .bg-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+  }
+  
+  .preview-bg-control .bg-slider::-webkit-slider-thumb:active {
+    transform: scale(0.95);
+  }
+  
+  .preview-bg-control .bg-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s ease;
+  }
+  
+  .preview-bg-control .bg-slider::-moz-range-thumb:hover {
+    transform: scale(1.15);
+  }
+  
+  .preview-bg-control .bg-slider::-moz-range-thumb:active {
+    transform: scale(0.95);
+  }
+  .preview-controls {
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    user-select: none;
+  }
+  
+  .preview-control-label {
+    font-size: 12px;
+    opacity: 0.85;
+  }
+  
+  .preview-control-value {
+    font-size: 12px;
+    opacity: 0.85;
+    min-width: 48px;
+    text-align: right;
+  }
+  
+  .preview-controls input[type="range"] {
+    width: 180px;
+    accent-color: #4da3ff;
+  }
+  
+  /* Document Preview Styles */
+  .document-preview-container {
+    color: var(--vscode-editor-foreground);
+  }
+  
+  /* DOCX Preview Styles (docx-preview) */
+  .docx-preview-wrapper {
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+      overflow-y: auto;
+    box-sizing: border-box;
+    padding: 0 10px;
+      /* 左右各10px内边距 */
+  }
+  
+  /* docx-preview 生成的 wrapper */
+  .docx-preview-wrapper .docx-wrapper {
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+    transform-origin: top center;
+    margin: 0 auto;
+    padding: 0;
+    background-color: transparent;
+  }
+    
+    /* docx-preview 的 section（页面） */
+    .docx-preview-wrapper .docx-wrapper>section.docx {
+    background: white;
+    box-sizing: border-box;
+    position: relative;
+    margin-bottom: 0;
+  }
+  
+  /* 文档内容通用样式 */
+  .docx-preview-wrapper .docx {
+    color: #000;
+    font-family: 'Calibri', 'Arial', 'Microsoft YaHei', sans-serif;
+      font-size: 11pt;
+      line-height: 1.15;
+  }
+  
+  /* 段落 */
+  .docx-preview-wrapper .docx p {
+    margin: 0;
+    padding: 0;
+  }
+  
+  /* 标题 */
+  .docx-preview-wrapper .docx h1 {
+    font-size: 20pt;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  .docx-preview-wrapper .docx h2 {
+    font-size: 16pt;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  .docx-preview-wrapper .docx h3 {
+    font-size: 14pt;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  .docx-preview-wrapper .docx h4,
+  .docx-preview-wrapper .docx h5,
+  .docx-preview-wrapper .docx h6 {
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 0;
+  }
+  
+  /* 表格 */
+  .docx-preview-wrapper .docx table {
+    border-collapse: collapse;
+    border: none;
+  }
+  
+  .docx-preview-wrapper .docx td,
+  .docx-preview-wrapper .docx th {
+    padding: 0;
+    vertical-align: top;
+  }
+  
+  /* 列表 */
+  .docx-preview-wrapper .docx ul,
+  .docx-preview-wrapper .docx ol {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .docx-preview-wrapper .docx li {
+    margin: 0;
+  }
+  
+  /* 图片 */
+  .docx-preview-wrapper .docx img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    }
+    
+    /* 分页 */
+    .docx-preview-wrapper .docx-wrapper>section.docx+section.docx {
+      margin-top: 20px;
+    }
+    
+    /* 页眉页脚 */
+    .docx-preview-wrapper .docx .docx-header,
+    .docx-preview-wrapper .docx .docx-footer {
+      font-size: 9pt;
+      color: #666;
+    }
+    
+    /* 超链接 */
+    .docx-preview-wrapper .docx a {
+      color: #0563C1;
+      text-decoration: underline;
+  }
+  
+  /* Excel Preview Styles */
+  .excel-tabs {
+    flex-shrink: 0;
+  }
+  
+  .excel-tab {
+    font-family: var(--vscode-font-family);
+    font-size: 12px;
+  }
+  
+  .excel-tab:hover {
+    opacity: 0.9;
+  }
+  
+  .excel-content {
+    overflow: auto;
+  }
+  
+  #excel-table {
+    min-width: 100%;
+    font-family: var(--vscode-font-family);
+    font-size: 12px;
+  }

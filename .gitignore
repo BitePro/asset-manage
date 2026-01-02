@@ -1,0 +1,10 @@
+out
+node_modules
+.vscode-test
+*.vsix
+*.log
+.DS_Store
+
+# GUI 构建产物
+GUI/dist
+GUI/node_modules
