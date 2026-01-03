@@ -300,28 +300,9 @@ export function registerFontHover(context: vscode.ExtensionContext, fontIndex: F
       async provideHover(document, position) {
         const line = document.lineAt(position.line).text;
         
-        // 检查当前行是否是注释
-        const trimmedLine = line.trim();
-        if (trimmedLine.startsWith('//') || trimmedLine.startsWith('/*') || trimmedLine.startsWith('*')) {
-          return; // 注释行不显示预览
-        }
-        
-        // 检查光标位置是否在注释中（/* ... */ 或 // ...）
-        const lineBeforeCursor = line.substring(0, position.character);
-        const lineAfterCursor = line.substring(position.character);
-        
-        // 检查单行注释 //
-        const singleLineCommentIndex = line.indexOf('//');
-        if (singleLineCommentIndex !== -1 && position.character >= singleLineCommentIndex) {
-          return; // 光标在单行注释中
-        }
-        
-        // 检查块注释 /* */
-        const blockCommentStart = lineBeforeCursor.lastIndexOf('/*');
-        const blockCommentEnd = lineBeforeCursor.lastIndexOf('*/');
-        if (blockCommentStart !== -1 && (blockCommentEnd === -1 || blockCommentStart > blockCommentEnd)) {
-          // 光标在块注释开始之后且没有闭合
-          return;
+        // 检查光标位置是否在注释中
+        if (isPositionInComment(document, position)) {
+          return; // 在注释中不显示预览
         }
         
         // 检查是否在 font-family 声明范围内（支持多行）
@@ -414,15 +395,13 @@ function parseFontFamilies(line: string): string[] {
  * 获取完整的 font-family 声明范围（支持多行）
  */
 function getFontFamilyRange(document: vscode.TextDocument, position: vscode.Position): vscode.Range | null {
-  // 先检查当前行是否包含 font-family
-  const currentLine = document.lineAt(position.line).text;
-  if (!/font-family\s*:/i.test(currentLine)) {
-    return null;
-  }
-
-  // 查找 font-family 声明的开始位置
+  // 查找 font-family 声明的开始位置（从当前行开始向上查找）
   let startLine = position.line;
-  let startChar = currentLine.indexOf('font-family');
+  let startChar = -1;
+
+  // 首先检查当前行
+  const currentLine = document.lineAt(startLine).text;
+  startChar = currentLine.indexOf('font-family');
 
   // 如果当前行没有找到，向上查找
   while (startChar === -1 && startLine > 0) {
@@ -462,7 +441,15 @@ function getFontFamilyRange(document: vscode.TextDocument, position: vscode.Posi
     endChar = document.lineAt(endLine).text.length;
   }
 
-  return new vscode.Range(startLine, startChar, endLine, endChar + 1);
+  // 创建 font-family 声明的范围
+  const fontFamilyRange = new vscode.Range(startLine, startChar, endLine, endChar + 1);
+
+  // 检查鼠标位置是否在这个声明范围内
+  if (!fontFamilyRange.contains(position)) {
+    return null;
+  }
+
+  return fontFamilyRange;
 }
 
 /**
@@ -597,4 +584,48 @@ function getHoveredFontRange(
   const endPos = document.positionAt(document.offsetAt(fontFamilyRange.start) + fontIndex + hoveredFont.length);
 
   return new vscode.Range(startPos, endPos);
+}
+
+/**
+ * 检查指定位置是否在注释中
+ */
+function isPositionInComment(document: vscode.TextDocument, position: vscode.Position): boolean {
+  const text = document.getText();
+  const offset = document.offsetAt(position);
+
+  // 检查单行注释 - 从当前位置向前查找当前行是否有 //
+  const currentLineStart = text.lastIndexOf('\n', offset - 1) + 1;
+  const currentLineEnd = text.indexOf('\n', offset);
+  const currentLine = text.substring(currentLineStart, currentLineEnd === -1 ? text.length : currentLineEnd);
+
+  const singleLineCommentIndex = currentLine.indexOf('//');
+  if (singleLineCommentIndex !== -1) {
+    const commentStartInLine = currentLineStart + singleLineCommentIndex;
+    if (offset >= commentStartInLine) {
+      return true; // 在单行注释中
+    }
+  }
+
+  // 检查块注释 - 统计从文件开头到当前位置的 /* 和 */ 数量
+  const textUpToOffset = text.substring(0, offset);
+
+  // 统计 /* 和 */ 的数量
+  let blockCommentStartCount = 0;
+  let blockCommentEndCount = 0;
+
+  let i = 0;
+  while (i < textUpToOffset.length - 1) {
+    if (textUpToOffset[i] === '/' && textUpToOffset[i + 1] === '*') {
+      blockCommentStartCount++;
+      i += 2;
+    } else if (textUpToOffset[i] === '*' && textUpToOffset[i + 1] === '/') {
+      blockCommentEndCount++;
+      i += 2;
+    } else {
+      i++;
+    }
+  }
+
+  // 如果 /* 数量多于 */ 数量，说明在块注释中
+  return blockCommentStartCount > blockCommentEndCount;
 }
