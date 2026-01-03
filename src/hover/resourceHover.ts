@@ -103,7 +103,7 @@ export function registerResourceHover(
           lines.push(`**码率**: ${(info.bitrate / 1000).toFixed(0)} kbps`);
 
         const md = new vscode.MarkdownString(lines.join("\n\n"));
-        (md as any).supportHtml = true;
+        md.supportHtml = true;
         md.isTrusted = true;
 
         // 预览
@@ -132,7 +132,7 @@ export function registerResourceHover(
               imgHeight = 50;
             }
             md.appendMarkdown(
-              `\n\n<div style="background-color: #666666;">< img src="${data}" width="${imgWidth}" height="${imgHeight}" /></div>`
+              `\n\n<img src="${data}" width="${imgWidth}" height="${imgHeight}" style="background-color: #666666; padding: 4px; border-radius: 4px;" />`
             );
           }
         }
