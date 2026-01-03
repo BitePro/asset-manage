@@ -36,10 +36,28 @@ const IMPORT_RE = new RegExp(
   "gi"
 );
 const HTML_ATTR_RE = new RegExp(
-  `\\b(?:src|href|data-src|poster)\\s*=\\s*['"]([^'"]+\\.(${EXT_REGEX}))['"]`,
+  `\\b(?:src|href|data-src|poster|srcset|data-srcset|data-lazy-src|data-original)\\s*=\\s*['"]([^'"]+\\.(${EXT_REGEX}))['"]`,
   "gi"
 );
 const GENERIC_QUOTED_RE = new RegExp(`['"]([^'"]+\\.(${EXT_REGEX}))['"]`, "gi");
+
+// Vue 动态绑定字符串字面量 (:attr="'value'" 或 :attr="`value`")
+const VUE_BINDING_RE = new RegExp(
+  `\\b(?:v-bind:)?(src|href|poster|data-src|data-lazy-src|data-original)\\s*=\\s*['"\`]([^'"\`]+\\.(${EXT_REGEX}))['"\`]`,
+  "gi"
+);
+
+// React JSX 字符串字面量 (attr={'value'} 或 attr={`value`})
+const REACT_JSX_BINDING_RE = new RegExp(
+  `\\b(src|href|poster|data-src|data-lazy-src|data-original)\\s*=\\s*\\{['"\`]([^'"\`]+\\.(${EXT_REGEX}))['"\`]\\}`,
+  "gi"
+);
+
+// srcset 属性特殊处理 (支持 srcset="img1.jpg 1x, img2.jpg 2x" 格式)
+const SRCSET_RE = new RegExp(
+  `\\b(?:srcset|data-srcset)\\s*=\\s*['"]([^'"]*?(\\w[^'"]*?\\.${EXT_REGEX})[^'"]*?)['"]`,
+  "gi"
+);
 
 export class AssetIndex {
   private assets: vscode.Uri[] = [];
@@ -332,6 +350,9 @@ function collectResourcePaths(content: string) {
   apply(URL_RE);
   apply(IMPORT_RE);
   apply(HTML_ATTR_RE);
+  apply(VUE_BINDING_RE);
+  apply(REACT_JSX_BINDING_RE);
+  apply(SRCSET_RE);
   apply(GENERIC_QUOTED_RE);
   return results;
 }
