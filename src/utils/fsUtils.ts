@@ -1,18 +1,18 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { promises as fs } from "fs";
-import { getAliasMap } from "../services/aliasResolver";
+import { getAliasMapForFile } from "../services/aliasResolver";
 
 export function resolveWorkspacePath(uri: vscode.Uri, targetPath: string): vscode.Uri | undefined {
   if (targetPath.startsWith("http://") || targetPath.startsWith("https://") || targetPath.startsWith("data:")) {
     return undefined;
   }
   const workspaceFolder = vscode.workspace.getWorkspaceFolder(uri);
-  const aliases = getAliasMap();
+  const aliases = getAliasMapForFile(uri.fsPath);
 
   let p = targetPath.trim();
   // 兼容 webpack/postcss 中的 ~ 前缀
-  if (p.startsWith("~")) p = p.slice(1);
+//   if (p.startsWith("~")) p = p.slice(1);
 
   // 别名解析（tsconfig/jsconfig paths）如 @/assets -> <workspace>/src/assets
   for (const [alias, mappedAbs] of Object.entries(aliases)) {
