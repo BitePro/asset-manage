@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import * as path from "path";
 import { FontIndex } from "../services/fontIndex";
 import { AssetIndex } from "../services/assetIndex";
-import { toHumanSize, statSafe, resolveWorkspacePath } from "../utils/fsUtils";
+import { toHumanSize, statSafe } from "../utils/fsUtils";
 import { log } from "../utils/logger";
 import { detectResourceType } from "../services/mediaInfo";
 
