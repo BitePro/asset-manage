@@ -5,7 +5,11 @@ import * as http from "http";
 import * as https from "https";
 import { promises as fs } from "fs";
 import { getAliasMapForFile } from "../services/aliasResolver";
-import { IMAGE_EXT } from "../services/mediaInfo";
+import { IMAGE_EXT, getResourceInfo } from "../services/mediaInfo";
+import { estimateOptimization } from "../services/optimizer";
+import { getGitInfo } from "../services/gitInfo";
+import { ResourceInfo, OptimizationEstimate, GitInfo } from "../types";
+import { imageCache } from "../store/imageCache";
 
 export type ResolvedType = "base64" | "file" | "network" | "not_found";
 
@@ -16,6 +20,10 @@ export interface ResolvedResource {
     raw?: string; // 原始 URL（如 http(s)）
     originalPath?: string; // 原始路径
     range?: vscode.Range; // 当前匹配范围
+    // 图片信息相关字段
+    resourceInfo?: ResourceInfo; // 图片基本信息（尺寸、体积等）
+    optimizationEstimates?: OptimizationEstimate[]; // 优化体积信息
+    gitInfo?: GitInfo; // Git提交信息
 }
 
 /**
@@ -84,9 +92,9 @@ export async function parseAndResolveResource(
         };
     }
 
-    // 使用 firstSuccessful 实现“谁先拿到真实内容，就返回谁”（兼容旧编译目标）
+    // 使用 firstSuccessful 实现"谁先拿到真实内容，就返回谁"（兼容旧编译目标）
     try {
-        const winner = await firstSuccessful(candidates.map(materializeCandidate));
+        const winner = await firstSuccessful(candidates.map(materializeCandidateWithCache)) as ResolvedResource;
         return winner;
     } catch {
         // 所有候选都失败
@@ -581,6 +589,55 @@ function firstSuccessful<T>(promises: Promise<T>[]): Promise<T> {
     });
 }
 
+/**
+ * 带缓存的候选资源物化函数
+ * 优先从缓存获取信息，如果没有则获取并缓存
+ */
+async function materializeCandidateWithCache(
+    candidate: ResolvedResource
+): Promise<ResolvedResource> {
+    // Base64资源不缓存，直接处理
+    if (candidate.type === "base64") {
+        return await materializeCandidate(candidate);
+    }
+
+    // 生成缓存键
+    let cacheKey: string | undefined;
+    if (candidate.type === "file" && candidate.uri) {
+        cacheKey = candidate.uri.fsPath;
+    } else if (candidate.type === "network" && candidate.raw) {
+        cacheKey = candidate.raw;
+    }
+
+    // 尝试从缓存获取
+    if (cacheKey) {
+        const cached = imageCache.get(cacheKey);
+        if (cached) {
+            // 从缓存恢复数据
+            return {
+                ...candidate,
+                resourceInfo: cached.resourceInfo,
+                optimizationEstimates: cached.optimizationEstimates,
+                gitInfo: cached.gitInfo,
+            };
+        }
+    }
+
+    // 缓存未命中，正常处理并缓存结果
+    const result = await materializeCandidate(candidate);
+
+    // 保存到缓存（只有非base64且有信息才缓存）
+    if (cacheKey && result.resourceInfo) {
+        imageCache.set(cacheKey, {
+            resourceInfo: result.resourceInfo,
+            optimizationEstimates: result.optimizationEstimates,
+            gitInfo: result.gitInfo,
+        });
+    }
+
+    return result;
+}
+
 function contentTypeToExt(contentType?: string | null): string | undefined {
     const map: Record<string, string> = {
         "image/png": "png",
@@ -610,17 +667,18 @@ function buildTempFilePath(extHint?: string): string {
 async function materializeCandidate(
     candidate: ResolvedResource
 ): Promise<ResolvedResource> {
+    let result: ResolvedResource;
+
     // 本地文件：验证可访问后直接返回
     if (candidate.type === "file" && candidate.uri) {
         await fs.access(candidate.uri.fsPath);
-        return {
+        result = {
             ...candidate,
             originalPath: candidate.uri?.fsPath,
         };
     }
-
     // Base64：写入临时文件后返回
-    if (candidate.type === "base64" && candidate.dataUrl) {
+    else if (candidate.type === "base64" && candidate.dataUrl) {
         const m = candidate.dataUrl.match(/^data:([^;]+);base64,(.+)$/);
         if (!m) throw new Error("Invalid data URL");
         const mime = m[1];
@@ -629,16 +687,15 @@ async function materializeCandidate(
         const tmpPath = buildTempFilePath(ext);
         const buf = Buffer.from(data, "base64");
         await fs.writeFile(tmpPath, buf);
-        return {
+        result = {
             type: "base64",
             uri: vscode.Uri.file(tmpPath),
             originalPath: candidate.dataUrl,
             range: candidate.range,
         };
     }
-
     // 网络资源：下载至临时文件后返回
-    if (candidate.type === "network" && candidate.raw) {
+    else if (candidate.type === "network" && candidate.raw) {
         const raw = candidate.raw as string;
         const url = new URL(raw);
         const proto = url.protocol === "https:" ? https : http;
@@ -708,13 +765,31 @@ async function materializeCandidate(
             start.on("error", reject);
         });
 
-        return {
+        result = {
             type: "network",
             uri: vscode.Uri.file(finalTmpPath),
             originalPath: raw,
             range: candidate.range,
         };
+    } else {
+    throw new Error("Unable to materialize candidate");
+}
+
+    // 为所有资源类型获取额外信息（包括base64）
+    if (result.uri) {
+        try {
+            const resourceInfo = await getResourceInfo(result.uri);
+            const optimizationEstimates = await estimateOptimization(resourceInfo);
+            const gitInfo = result.type === "base64" ? undefined : await getGitInfo(result.uri); // base64不需要git信息
+
+            result.resourceInfo = resourceInfo;
+            result.optimizationEstimates = optimizationEstimates;
+            result.gitInfo = gitInfo;
+        } catch (error) {
+            // 获取信息失败时不影响解析结果，但记录错误
+            console.warn("获取资源信息失败:", error);
+        }
     }
 
-    throw new Error("Unable to materialize candidate");
+    return result;
 }

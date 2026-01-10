@@ -1,7 +1,4 @@
 import * as vscode from "vscode";
-import { getResourceInfo } from "../services/mediaInfo";
-import { estimateOptimization } from "../services/optimizer";
-import { getGitInfo } from "../services/gitInfo";
 import { toHumanSize } from "../utils/fsUtils";
 import { log } from "../utils/logger";
 import { AssetIndex } from "../services/assetIndex";
@@ -36,7 +33,8 @@ export function registerResourceHover(
       ) {
         // 仅在悬浮时解析，并采用“先成功先返回”的物化策略
         const resolvedRes = await parseAndResolveResource(document, position);
-        const fsPath = resolvedRes.uri?.fsPath;
+        const resourceInfo = resolvedRes.resourceInfo;
+        const fsPath = resourceInfo?.uri?.fsPath;
         if (resolvedRes.type === "not_found") return;
 
         const range =
@@ -53,19 +51,18 @@ export function registerResourceHover(
         let info: any;
 
         // 预览统一使用文件路径（本地或临时文件）
-        if (resolvedRes.uri) {
-          const resolved = resolvedRes.uri;
-          info = await getResourceInfo(resolved);
+        if (resourceInfo?.uri) {
+          const info = resourceInfo;
 
-          if (!info.exists && range) {
+          if (!info?.exists && range) {
             const diag = new vscode.Diagnostic(
               range,
-              `资源不存在: ${vscode.workspace.asRelativePath(resolved)}`,
+              `资源不存在: ${vscode.workspace.asRelativePath(info.uri)}`,
               vscode.DiagnosticSeverity.Error
             );
             diagnostics.set(document.uri, [diag]);
             return new vscode.Hover(
-              `资源不存在: ${vscode.workspace.asRelativePath(resolved)}`,
+              `资源不存在: ${vscode.workspace.asRelativePath(info.uri)}`,
               range
             );
           } else {
@@ -78,26 +75,28 @@ export function registerResourceHover(
           } else if (resolvedRes.type === "network") {
             lines.push(`**网络图片**`);
           } else {
-            lines.push(`**路径**: ${vscode.workspace.asRelativePath(resolved)}`);
+            lines.push(`**路径**: ${vscode.workspace.asRelativePath(info.uri)}`);
           }
-          
-          lines.push(`**体积**: ${toHumanSize(info.sizeBytes)}`);
-          if (info.dimensions) {
-            lines.push(
-              `**尺寸**: ${info.dimensions.width} × ${info.dimensions.height}`
-            );
+
+          if (info) {
+            lines.push(`**体积**: ${toHumanSize(info.sizeBytes)}`);
+            if (info.dimensions) {
+              lines.push(
+                `**尺寸**: ${info.dimensions.width} × ${info.dimensions.height}`
+              );
+            }
+            if (info.durationSeconds) {
+              const dur = info.durationSeconds.toFixed(2);
+              lines.push(`**时长**: ${dur}s`);
+            }
+            if (info.codecs) lines.push(`**编码**: ${info.codecs}`);
+            if (info.bitrate)
+              lines.push(`**码率**: ${(info.bitrate / 1000).toFixed(0)} kbps`);
           }
-          if (info.durationSeconds) {
-            const dur = info.durationSeconds.toFixed(2);
-            lines.push(`**时长**: ${dur}s`);
-          }
-          if (info.codecs) lines.push(`**编码**: ${info.codecs}`);
-          if (info.bitrate)
-            lines.push(`**码率**: ${(info.bitrate / 1000).toFixed(0)} kbps`);
 
           md.appendMarkdown(lines.join("\n\n"));
 
-          if (info.type === "image") {
+          if (info?.type === "image") {
             const width = info.dimensions?.width ?? 100;
             const height = info.dimensions?.height ?? 100;
             let imgWidth = 0;
@@ -115,7 +114,7 @@ export function registerResourceHover(
             md.appendMarkdown('\n\n');
           }
 
-          const estimates = await estimateOptimization(info);
+          const estimates = resolvedRes.optimizationEstimates;
           if (estimates?.length) {
             const desc = estimates
               .map(
@@ -128,7 +127,7 @@ export function registerResourceHover(
             md.appendMarkdown(`\n\n**可优化体积**\n${desc}`);
           }
 
-          const git = await getGitInfo(resolved);
+          const git = resolvedRes.gitInfo;
           if (git) {
             md.appendMarkdown(
               `\n\n**Git**\n- 最后提交: ${git.date ?? "未知"}\n- 作者: ${
@@ -139,7 +138,7 @@ export function registerResourceHover(
             );
           }
 
-          const ref = assetIndex.getReferences(resolved);
+          const ref = assetIndex.getReferences(info.uri);
           if (ref) {
             md.appendMarkdown(`\n\n**引用次数**: ${ref.references.length}`);
           } else {
