@@ -39,8 +39,8 @@ export async function activate(context: vscode.ExtensionContext) {
   const fontIndex = new FontIndex();
   const assetIndex = new AssetIndex();
 
+  // 不再在启动时自动加载索引，只在需要时加载
   await loadAliasMap(workspace);
-  await rescan(workspace, fontIndex, assetIndex, include, exclude);
 
   const referencesView = new ReferencesViewProvider();
   const imagesView = new AssetViewProvider(
@@ -132,6 +132,13 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       "assetLens.findReferences",
       async (uri?: vscode.Uri) => {
+        // 如果索引还没有加载，先加载索引
+        if (assetIndex.listAssets().length === 0) {
+          vscode.window.showInformationMessage("AssetLens 正在加载资源索引...");
+          await rescan(workspace, fontIndex, assetIndex, include, exclude);
+          refreshUnused();
+        }
+
         const target =
           uri ??
           (
@@ -141,14 +148,14 @@ export async function activate(context: vscode.ExtensionContext) {
             })
           )?.[0];
         if (!target) return;
-        const refs = assetIndex.getReferences(target);
-        if (!refs || refs.references.length === 0) {
+        const refs = await assetIndex.findReferencesByPath(target.fsPath);
+        if (refs.length === 0) {
           vscode.window.showInformationMessage("未找到引用");
           return;
         }
 
         // 使用我们自己的 referencesView 展示，完全避开 vscode.references-view 扩展
-        referencesView.showReferences(target, refs.references);
+        referencesView.showReferences(target, refs);
         vscode.commands.executeCommand("workbench.view.explorer");
         vscode.commands.executeCommand("assetLens.referencesView.focus");
       }
@@ -172,53 +179,53 @@ export async function activate(context: vscode.ExtensionContext) {
   );
   log("✅ assetLens.imagesView 已注册");
 
-  // 文件监听：仅在文件/文件夹 新增、删除、重命名 时刷新，不监听文件内容修改
-  const watcher = vscode.workspace.createFileSystemWatcher("**/*");
-  const debounce = debounceAsync(async () => {
-    await loadAliasMap(workspace);
-    await rescan(workspace, fontIndex, assetIndex, include, exclude);
-    refreshUnused();
-  }, 1500);
+  // 文件监听已禁用，只有在查找引用时才会加载索引
+  // const watcher = vscode.workspace.createFileSystemWatcher("**/*");
+  // const debounce = debounceAsync(async () => {
+  //   await loadAliasMap(workspace);
+  //   await rescan(workspace, fontIndex, assetIndex, include, exclude);
+  //   refreshUnused();
+  // }, 1500);
 
-  // 只监听创建和删除事件（包含重命名），不监听文件内容变化
-  watcher.onDidCreate(() => debounce());
-  watcher.onDidDelete(() => debounce());
-  context.subscriptions.push(watcher);
+  // // 只监听创建和删除事件（包含重命名），不监听文件内容变化
+  // watcher.onDidCreate(() => debounce());
+  // watcher.onDidDelete(() => debounce());
+  // context.subscriptions.push(watcher);
 
   // 监听文件保存事件，增量更新引用索引
-  context.subscriptions.push(
-    vscode.workspace.onDidSaveTextDocument(async (document) => {
-      // 只处理文本文件（代码文件、样式文件等）
-      const supportedExtensions = [
-        "ts", "tsx", "js", "jsx", "vue", "svelte",
-        "css", "scss", "less", "html", "md"
-      ];
-      const ext = document.fileName.split(".").pop()?.toLowerCase();
+  // context.subscriptions.push(
+  //   vscode.workspace.onDidSaveTextDocument(async (document) => {
+  //     // 只处理文本文件（代码文件、样式文件等）
+  //     const supportedExtensions = [
+  //       "ts", "tsx", "js", "jsx", "vue", "svelte",
+  //       "css", "scss", "less", "html", "md"
+  //     ];
+  //     const ext = document.fileName.split(".").pop()?.toLowerCase();
       
-      if (!ext || !supportedExtensions.includes(ext)) {
-        return;
-      }
+  //     if (!ext || !supportedExtensions.includes(ext)) {
+  //       return;
+  //     }
 
-      // 跳过排除的文件
-      const relativePath = vscode.workspace.asRelativePath(document.uri);
-      const shouldExclude = exclude.some(pattern => {
-        const glob = pattern.replace(/\*\*/g, ".*").replace(/\*/g, "[^/]*");
-        return new RegExp(glob).test(relativePath);
-      });
+  //     // 跳过排除的文件
+  //     const relativePath = vscode.workspace.asRelativePath(document.uri);
+  //     const shouldExclude = exclude.some(pattern => {
+  //       const glob = pattern.replace(/\*\*/g, ".*").replace(/\*/g, "[^/]*");
+  //       return new RegExp(glob).test(relativePath);
+  //     });
       
-      if (shouldExclude) {
-        return;
-      }
+  //     if (shouldExclude) {
+  //       return;
+  //     }
 
-      log(`📝 文件已保存，增量更新引用: ${document.fileName}`);
+  //     log(`📝 文件已保存，增量更新引用: ${document.fileName}`);
       
-      // 增量更新该文件的引用
-      await assetIndex.updateFileReferences(document.uri, document.getText());
+  //     // 增量更新该文件的引用
+  //     await assetIndex.updateFileReferences(document.uri, document.getText());
       
-      // 刷新装饰器（更新未使用资源的显示）
-      refreshUnused();
-    })
-  );
+  //     // 刷新装饰器（更新未使用资源的显示）
+  //     refreshUnused();
+  //   })
+  // );
 
   // 注册快捷键 Ctrl+R (Windows/Linux) 或 Cmd+R (macOS) 刷新
   context.subscriptions.push(

@@ -27,6 +27,125 @@ export interface ResolvedResource {
 }
 
 /**
+ * 解析资源引用路径，返回绝对路径URI（用于 assetIndex 引用查找）
+ * @param documentUri 包含资源引用的文件URI
+ * @param rawPath 原始路径字符串
+ * @returns 解析后的绝对路径URI，如果无法解析则返回undefined
+ */
+export async function resolveResourcePath(documentUri: vscode.Uri, rawPath: string): Promise<vscode.Uri | undefined> {
+    const cleanedRaw = rawPath.replace(/\|(width=\d*)?(height=\d*)?/gm, "");
+
+    // 跳过 data URLs 和网络 URLs
+    if (cleanedRaw.indexOf("data:image") === 0 ||
+        cleanedRaw.indexOf("http") === 0 ||
+        cleanedRaw.indexOf("//") === 0) {
+        return undefined;
+    }
+
+    // 绝对路径直接检查是否存在
+    if (path.isAbsolute(cleanedRaw)) {
+        if (existsSyncSafe(cleanedRaw)) {
+            return vscode.Uri.file(cleanedRaw);
+        }
+        return undefined;
+    }
+
+    const workspaceFolder = vscode.workspace.getWorkspaceFolder(documentUri);
+    const workspaceRoot = workspaceFolder?.uri.fsPath;
+    const aliases = getAliasMapForFile(documentUri.fsPath);
+
+    // 获取 AsciiDoc imagesdir（如果适用）
+    let relativeImageDir = "";
+    try {
+        // 创建一个临时文档来获取 imagesdir，但这可能不可靠
+        // 对于 assetIndex 的场景，我们简化处理，不依赖复杂的文档上下文
+        const tempDoc = await vscode.workspace.openTextDocument(documentUri);
+        relativeImageDir = getRelativeImagesDir(tempDoc, 0);
+        await vscode.commands.executeCommand('vscode.close', tempDoc.uri);
+    } catch {
+        // 如果无法打开文档，忽略 imagesdir
+    }
+
+    // 1) 相对路径：相对于文件所在目录 + imagesdir
+    {
+        const pathName = path.normalize(cleanedRaw);
+        if (pathName) {
+            const docDir = path.dirname(documentUri.fsPath);
+            const testImagePath = path.join(docDir, relativeImageDir || "", pathName);
+            if (existsSyncSafe(testImagePath)) {
+                return vscode.Uri.file(testImagePath);
+            }
+        }
+    }
+
+    // 2) 别名解析和workspace根目录解析
+    if (workspaceRoot) {
+        const pathName = path.normalize(cleanedRaw).replace(/\\/g, "/");
+        if (pathName) {
+            const pathsToTest: string[] = [pathName];
+
+            // alias 前缀替换
+            Object.keys(aliases).forEach((alias) => {
+                const aliasPrefix = alias.endsWith("/") ? alias : alias + "/";
+                if (
+                    alias !== "" &&
+                    (pathName.startsWith(aliasPrefix) || pathName === alias)
+                ) {
+                    const replacement = aliases[alias];
+                    const remaining =
+                        pathName === alias ? "" : pathName.slice(aliasPrefix.length);
+                    const resolvedPath = path.join(replacement, remaining);
+                    pathsToTest.push(resolvedPath);
+                }
+            });
+
+            // workspace 根目录测试
+            for (const testPath of pathsToTest) {
+                const testImagePath = path.join(workspaceRoot, testPath);
+                if (existsSyncSafe(testImagePath)) {
+                    return vscode.Uri.file(testImagePath);
+                }
+            }
+
+            // additionalSourceFolders
+            const cfg = vscode.workspace.getConfiguration("assetLens", documentUri);
+            const additionalSourceFolders = [
+                ...(cfg.get<string[]>("sourceFolder") ?? []),
+                ...(cfg.get<string[]>("sourceFolders") ?? []),
+            ];
+            const fallbackFolders = ["static", "public"];
+
+            const folders = additionalSourceFolders.length
+                ? additionalSourceFolders
+                : fallbackFolders;
+            for (const testPath of pathsToTest) {
+                for (const folder of folders) {
+                    let testImagePath: string;
+                    if (path.isAbsolute(folder)) {
+                        testImagePath = path.join(folder, testPath);
+                    } else {
+                        testImagePath = path.join(workspaceRoot, folder, testPath);
+                    }
+                    if (existsSyncSafe(testImagePath)) {
+                        return vscode.Uri.file(testImagePath);
+                    }
+                }
+            }
+        }
+    }
+
+    // 3) 以 / 开头的路径，尝试以工作区根拼接
+    if (workspaceRoot && cleanedRaw.startsWith("/")) {
+        const joined = path.resolve(workspaceRoot, "." + cleanedRaw);
+        if (existsSyncSafe(joined)) {
+            return vscode.Uri.file(joined);
+        }
+    }
+
+    return undefined;
+}
+
+/**
  * 面向资源 Hover 的通用解析与绝对路径解析函数。
  * 目标：尽量复用性高，兼容 gutter-preview 中的场景。
  */

@@ -4,7 +4,7 @@ import * as path from "path";
 import { promises as fs } from "fs";
 import { AssetReference } from "../types";
 import { log } from "../utils/logger";
-import { resolveWorkspacePath } from "../utils/fsUtils";
+import { resolveResourcePath } from "../utils/resourcePathResolver";
 import {
   isResourceExt,
   IMAGE_EXT,
@@ -123,7 +123,7 @@ export class AssetIndex {
       const matches = collectResourcePaths(content);
 
       for (const m of matches) {
-        const resolved = resolveWorkspacePath(fileUri, m.path);
+        const resolved = await resolveResourcePath(fileUri, m.path);
         if (!resolved) continue;
         try {
           const stat = await fs.stat(resolved.fsPath);
@@ -174,6 +174,117 @@ export class AssetIndex {
   }
 
   /**
+   * 根据资源文件绝对路径查找所有引用该资源的位置
+   * @param sourcePath 资源文件的绝对路径
+   * @returns 该资源的所有引用位置
+   */
+  async findReferencesByPath(sourcePath: string): Promise<vscode.Location[]> {
+    // 使用新的实时搜索方法
+    return await this.findReferencesByRealtimeSearch(sourcePath);
+  }
+
+  /**
+   * 实时搜索资源引用：遍历代码文件，查找包含图片扩展名的行，然后解析路径
+   * @param sourcePath 资源文件的绝对路径
+   * @returns 该资源的所有引用位置
+   */
+  private async findReferencesByRealtimeSearch(sourcePath: string): Promise<vscode.Location[]> {
+    const workspace = vscode.workspace.workspaceFolders?.[0];
+    if (!workspace) return [];
+
+    const config = vscode.workspace.getConfiguration("assetLens");
+    const include = config.get<string[]>("scanInclude") ?? ["**/*"];
+    const exclude = config.get<string[]>("scanExclude") ?? [
+      "**/node_modules/**",
+      "**/.git/**",
+    ];
+
+    // 获取所有代码文件
+    const textPatterns = TEXT_GLOBS;
+    const texts = await fg(textPatterns, {
+      cwd: workspace.uri.fsPath,
+      ignore: exclude,
+      absolute: true,
+      suppressErrors: true,
+      onlyFiles: true,
+    });
+
+    const locations: vscode.Location[] = [];
+
+    for (const file of texts) {
+      let content: string;
+      try {
+        content = await fs.readFile(file, "utf8");
+      } catch {
+        continue;
+      }
+
+      const fileUri = vscode.Uri.file(file);
+      const fileLocations = await this.findReferencesInFile(content, fileUri, sourcePath);
+      locations.push(...fileLocations);
+    }
+
+    return locations;
+  }
+
+  /**
+   * 在单个文件中查找资源引用
+   * @param content 文件内容
+   * @param fileUri 文件URI
+   * @param sourcePath 要查找的资源绝对路径
+   * @returns 该文件中的引用位置列表
+   */
+  private async findReferencesInFile(
+    content: string,
+    fileUri: vscode.Uri,
+    sourcePath: string
+  ): Promise<vscode.Location[]> {
+    const locations: vscode.Location[] = [];
+    const lines = content.split(/\r?\n/);
+
+    // 预先检查文件是否包含图片扩展名，避免不必要的解析
+    if (!this.lineContainsImageExtension(content)) {
+      return locations;
+    }
+
+    // 使用整个文件的内容来查找引用，但只处理包含图片扩展名的行
+    const matches = collectResourcePaths(content);
+
+    for (const match of matches) {
+      try {
+        const resolved = await resolveResourcePath(fileUri, match.path);
+        if (resolved && resolved.fsPath === sourcePath) {
+          // 计算引用在文件中的位置
+          const before = content.substring(0, match.index);
+          const line = before.split(/\r?\n/).length - 1;
+          const char = match.index - before.lastIndexOf("\n") - 1;
+          const loc = new vscode.Location(
+            fileUri,
+            new vscode.Position(line, Math.max(0, char))
+          );
+          locations.push(loc);
+        }
+      } catch {
+        // 解析失败，跳过
+        continue;
+      }
+    }
+
+    return locations;
+  }
+
+  /**
+   * 检查一行代码是否包含图片扩展名
+   * @param line 代码行
+   * @returns 是否包含图片扩展名
+   */
+  private lineContainsImageExtension(line: string): boolean {
+    const imageExtensions = IMAGE_EXT.map(ext => ext.toLowerCase());
+    const lowerLine = line.toLowerCase();
+    return imageExtensions.some(ext => lowerLine.includes('.' + ext));
+  }
+
+  /**
    * 增量更新单个文件的引用（用于文件保存时）
    * @param fileUri 被修改的文件URI
    * @param content 文件的新内容
@@ -189,7 +300,7 @@ export class AssetIndex {
     const refsByResource = new Map<string, vscode.Location[]>();
 
     for (const m of matches) {
-      const resolved = resolveWorkspacePath(fileUri, m.path);
+      const resolved = await resolveResourcePath(fileUri, m.path);
       if (!resolved) continue;
 
       // 验证资源文件是否存在且是有效的资源文件
