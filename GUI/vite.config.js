@@ -23,7 +23,7 @@ export default defineConfig({
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AssetLens Panel (Dev)</title>
+  <title>Asset Manage Panel (Dev)</title>
   <!-- PDF.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script>

@@ -1,5 +1,5 @@
 {
-    "name": "assetlens-gui",
+    "name": "asset-manage-gui",
     "version": "0.0.1",
     "private": true,
     "type": "module",

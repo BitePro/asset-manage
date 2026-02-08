@@ -1,0 +1,26 @@
+# 源码与配置（仅打包 out 与 GUI/dist）
+src/**
+tsconfig.json
+.vscode/**
+.gitignore
+.mocharc.json
+.npmrc
+
+# GUI 源码与构建配置（仅打包 GUI/dist）
+GUI/src/**
+GUI/package.json
+GUI/tsconfig.json
+GUI/tsconfig.node.json
+GUI/vite.config.js
+GUI/index.html
+GUI/pnpm-lock.yaml
+
+# 测试与临时
+test-*
+*.vsix
+.DS_Store
+*.log
+**/*.map
+
+# 锁文件（可选，打包时 vsce 会安装依赖）
+pnpm-lock.yaml

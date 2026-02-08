@@ -1,22 +1,28 @@
 import * as vscode from "vscode";
 import * as path from "path";
-import { FontIndex } from "../services/fontIndex";
-import { AssetIndex } from "../services/assetIndex";
+import fg from "fast-glob";
 import { toHumanSize, statSafe } from "../utils/fsUtils";
 import { log } from "../utils/logger";
-import { detectResourceType } from "../services/mediaInfo";
+import {
+  detectResourceType,
+  IMAGE_EXT,
+  AUDIO_EXT,
+  VIDEO_EXT,
+  FONT_EXT,
+  OFFICE_EXT,
+  OTHER_STATIC_EXT,
+  isResourceExt,
+} from "../services/mediaInfo";
 
 export class AssetViewProvider implements vscode.WebviewViewProvider {
-    private webviewView?: vscode.WebviewView;
+  private webviewView?: vscode.WebviewView;
   private fontCharsetCache = new Map<string, string>();
   private static readonly FONT_CHARSET =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789`~!@#$%^&*()_+-=[]{};:'\",.<>?/\\|一二三四五六七八九十春夏秋冬東南西北风雨雷电云山海川湖田木林森花草鸟鱼虫日月星辰天地人和";
 
   constructor(
     private readonly viewId: "fonts" | "images",
-    private readonly fontIndex: FontIndex,
-    private readonly assetIndex: AssetIndex,
-    private readonly extensionUri: vscode.Uri
+    private readonly extensionUri: vscode.Uri,
   ) {
     log(`🏗️ AssetViewProvider 构造函数被调用，viewId: ${viewId}`);
   }
@@ -24,7 +30,7 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
   resolveWebviewView(
     webviewView: vscode.WebviewView,
     context: vscode.WebviewViewResolveContext,
-    token: vscode.CancellationToken
+    token: vscode.CancellationToken,
   ) {
     log(`🎬 resolveWebviewView 被调用！viewId: ${this.viewId}`);
     log(`📋 context.state: ${JSON.stringify(context.state)}`);
@@ -42,29 +48,13 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
       enableCommandUris: true,
     };
 
-    // 监听索引变更，自动刷新视图
-    if (this.viewId === "fonts") {
-      this.fontIndex.onDidChange(() => {
-        log("📢 FontIndex 变更事件触发，自动刷新字体视图");
-        this.render();
-      });
-      log(`✅ 已注册 FontIndex 变更监听器`);
-    } else {
-      this.assetIndex.onDidChange(() => {
-        log("📢 AssetIndex 变更事件触发，自动刷新图片视图");
-        this.render();
-      });
-      log(`✅ 已注册 AssetIndex 变更监听器`);
-    }
-
     // 处理来自 webview 的消息
     webviewView.webview.onDidReceiveMessage(async (msg) => {
       // 兼容 msg.command 与 msg.type，避免前端与扩展端字段不一致
       const command = msg.command ?? msg.type;
       if (command === "refresh") {
         log(`🔄 用户手动点击刷新 ${this.viewId} 视图`);
-        await vscode.commands.executeCommand("assetLens.refreshIndexes");
-        await this.sendDataToWebview();
+        await vscode.commands.executeCommand("assetManage.refreshIndexes");
         webviewView.webview.postMessage({ type: "refreshDone" });
       } else if (command === "getData") {
         log(`📥 前端请求数据`);
@@ -72,7 +62,7 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
       } else if (command === "reveal" && msg.path) {
         vscode.commands.executeCommand(
           "revealInExplorer",
-          vscode.Uri.file(msg.path)
+          vscode.Uri.file(msg.path),
         );
       } else if ((command === "open" || command === "openFile") && msg.path) {
         vscode.workspace
@@ -87,11 +77,11 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
   }
 
   /**
-   * 手动刷新视图（供外部命令调用）
+   * 重新拉取数据并发送到 webview（供外部命令调用）
    */
-  async refresh() {
+  async refreshData() {
     log(`外部触发刷新 ${this.viewId} 视图`);
-    await vscode.commands.executeCommand("assetLens.refreshIndexes");
+    await this.sendDataToWebview();
   }
 
   /**
@@ -107,12 +97,12 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
       log(`🎨 开始渲染 ${this.viewId} 视图...`);
       const html = this.getWebviewContent(this.webviewView.webview);
       this.webviewView.webview.html = html;
-      
+
       // 等待 webview 加载完成后再发送数据
       setTimeout(async () => {
         await this.sendDataToWebview();
       }, 500);
-      
+
       log(`✅ ${this.viewId} 视图渲染完成`);
     } catch (error) {
       log(`❌ ${this.viewId} 视图渲染失败: ${error}`);
@@ -125,17 +115,17 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
    * 获取 Webview HTML 内容，加载 React 应用
    */
   private getWebviewContent(webview: vscode.Webview): string {
-    const guiDistPath = vscode.Uri.joinPath(this.extensionUri, 'GUI', 'dist');
-    const indexHtmlPath = vscode.Uri.joinPath(guiDistPath, 'index.html');
-    
+    const guiDistPath = vscode.Uri.joinPath(this.extensionUri, "GUI", "dist");
+    const indexHtmlPath = vscode.Uri.joinPath(guiDistPath, "index.html");
+
     // 读取打包后的 index.html
     try {
-      const fs = require('fs');
-      let htmlContent = fs.readFileSync(indexHtmlPath.fsPath, 'utf8');
-      
+      const fs = require("fs");
+      let htmlContent = fs.readFileSync(indexHtmlPath.fsPath, "utf8");
+
       // 检查是否是开发模式（HTML 中包含 localhost）
-      const isDevMode = htmlContent.includes('localhost:');
-      
+      const isDevMode = htmlContent.includes("localhost:");
+
       if (isDevMode) {
         // 开发模式：直接返回，不需要替换路径
         log(`🔧 开发模式：使用 Vite 开发服务器`);
@@ -146,14 +136,14 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
         htmlContent = htmlContent.replace(
           /(href|src)="([^"]+)"/g,
           (match: string, attr: string, path: string) => {
-            if (path.startsWith('http') || path.startsWith('//')) {
+            if (path.startsWith("http") || path.startsWith("//")) {
               return match;
             }
             const resourceUri = webview.asWebviewUri(
-              vscode.Uri.joinPath(guiDistPath, path.replace(/^\.\//, ''))
+              vscode.Uri.joinPath(guiDistPath, path.replace(/^\.\//, "")),
             );
             return `${attr}="${resourceUri}"`;
-          }
+          },
         );
         return this.injectCSP(htmlContent, webview);
       }
@@ -169,7 +159,7 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
    */
   private injectCSP(htmlContent: string, webview: vscode.Webview): string {
     const nonce = this.getNonce();
-    
+
     // 生成 CSP
     const csp = [
       `default-src 'none'`,
@@ -186,13 +176,13 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
       `frame-src ${webview.cspSource} data:`,
       // 允许 Web Worker（PDF.js 需要）
       `worker-src ${webview.cspSource} blob: https://cdnjs.cloudflare.com`,
-    ].join('; ');
+    ].join("; ");
 
     // 在 <head> 标签后注入 CSP meta 标签
-    if (htmlContent.includes('<head>')) {
+    if (htmlContent.includes("<head>")) {
       htmlContent = htmlContent.replace(
-        '<head>',
-        `<head>\n    <meta http-equiv="Content-Security-Policy" content="${csp}">`
+        "<head>",
+        `<head>\n    <meta http-equiv="Content-Security-Policy" content="${csp}">`,
       );
     }
 
@@ -203,8 +193,9 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
    * 生成随机 nonce
    */
   private getNonce(): string {
-    let text = '';
-    const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let text = "";
+    const possible =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     for (let i = 0; i < 32; i++) {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
     }
@@ -221,35 +212,92 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
       const fontData = await this.getFontData();
       log(`📤 发送字体数据: ${fontData.length} 个字体`);
       this.webviewView.webview.postMessage({
-        type: 'fontData',
-        data: fontData
+        type: "fontData",
+        data: fontData,
       });
     } else {
       const assetData = await this.getAssetData();
       log(`📤 发送资源数据`);
       this.webviewView.webview.postMessage({
-        type: 'assetData',
-        data: assetData
+        type: "assetData",
+        data: assetData,
       });
     }
+  }
+
+  /**
+   * 按需扫描工作区，返回所有静态资源文件（去除 node_modules/.git 等）
+   */
+  private async listAllAssets(): Promise<vscode.Uri[]> {
+    const workspace = vscode.workspace.workspaceFolders?.[0];
+    if (!workspace) return [];
+    const cwd = workspace.uri.fsPath;
+
+    const config = vscode.workspace.getConfiguration("assetManage");
+    const include = config.get<string[]>("scanInclude") ?? ["**/*"];
+    const exclude = config.get<string[]>("scanExclude") ?? [
+      "**/node_modules/**",
+      "**/.git/**",
+      "**/dist/**",
+      "**/build/**",
+    ];
+
+    // 当 include 使用自定义模式时，优先按 include 搜索，再按扩展过滤；
+    // 默认模式则直接用扩展过滤的通配符以提升效率。
+    const ALL_EXT = [
+      ...IMAGE_EXT,
+      ...AUDIO_EXT,
+      ...VIDEO_EXT,
+      ...FONT_EXT,
+      ...OFFICE_EXT,
+      ...OTHER_STATIC_EXT,
+    ];
+
+    let files: string[] = [];
+    if (include.length && !(include.length === 1 && include[0] === "**/*")) {
+      files = await fg(include, {
+        cwd,
+        ignore: exclude,
+        absolute: true,
+        suppressErrors: true,
+        onlyFiles: true,
+      });
+      files = files.filter(isResourceExt);
+    } else {
+      const pattern = `**/*.{${ALL_EXT.join(",")}}`;
+      files = await fg([pattern], {
+        cwd,
+        ignore: exclude,
+        absolute: true,
+        suppressErrors: true,
+        onlyFiles: true,
+      });
+    }
+
+    return files.map((p) => vscode.Uri.file(p));
   }
 
   /**
    * 获取字体数据
    */
   private async getFontData() {
-    const allAssets = this.assetIndex.listAssets();
-    const fontFiles = allAssets.filter((uri) => detectResourceType(uri) === "font");
-    
+    const allAssets = await this.listAllAssets();
+    const fontFiles = allAssets.filter(
+      (uri) => detectResourceType(uri) === "font",
+    );
+
     const fonts = [];
     for (const uri of fontFiles) {
       const stat = await statSafe(uri);
       if (!stat) continue;
 
-      const familyName = await this.getFontFamilyFromFile(uri) || 
-                         path.basename(uri.fsPath, path.extname(uri.fsPath));
-      const charset = await this.extractFontCharsetFromSources([uri]) || AssetViewProvider.FONT_CHARSET;
-      
+      const familyName =
+        (await this.getFontFamilyFromFile(uri)) ||
+        path.basename(uri.fsPath, path.extname(uri.fsPath));
+      const charset =
+        (await this.extractFontCharsetFromSources([uri])) ||
+        AssetViewProvider.FONT_CHARSET;
+
       fonts.push({
         path: uri.fsPath,
         name: path.basename(uri.fsPath, path.extname(uri.fsPath)),
@@ -260,7 +308,7 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
         charset: charset.slice(0, 100),
         fullCharset: charset,
         previewCharset: charset.slice(0, 120),
-        uri: this.webviewView!.webview.asWebviewUri(uri).toString()
+        uri: this.webviewView!.webview.asWebviewUri(uri).toString(),
       });
     }
 
@@ -271,9 +319,9 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
    * 获取资源数据
    */
   private async getAssetData() {
-    const allAssets = this.assetIndex.listAssets();
+    const allAssets = await this.listAllAssets();
     const categorized = this.categorizeAssets(allAssets);
-    
+
     // 处理图片
     const imagesByFolder = new Map<string, any[]>();
     for (const img of categorized.images) {
@@ -282,18 +330,18 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
 
       const dir = path.dirname(img.fsPath);
       const relativeDir = vscode.workspace.asRelativePath(dir);
-      
+
       if (!imagesByFolder.has(relativeDir)) {
         imagesByFolder.set(relativeDir, []);
       }
-      
+
       imagesByFolder.get(relativeDir)!.push({
         path: img.fsPath,
         name: path.basename(img.fsPath),
         size: toHumanSize(stat.size),
         ext: path.extname(img.fsPath).slice(1).toUpperCase(),
         uri: this.webviewView!.webview.asWebviewUri(img).toString(),
-        relativePath: vscode.workspace.asRelativePath(img.fsPath)
+        relativePath: vscode.workspace.asRelativePath(img.fsPath),
       });
     }
 
@@ -305,7 +353,7 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
 
       const dir = path.dirname(uri.fsPath);
       const relativeDir = vscode.workspace.asRelativePath(dir);
-      
+
       if (!mediaByFolder.has(relativeDir)) {
         mediaByFolder.set(relativeDir, []);
       }
@@ -317,7 +365,7 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
         ext: path.extname(uri.fsPath).replace(".", "").toUpperCase(),
         uri: this.webviewView!.webview.asWebviewUri(uri).toString(),
         relativePath: vscode.workspace.asRelativePath(uri.fsPath),
-        kind: detectResourceType(uri) === "video" ? "video" : "audio"
+        kind: detectResourceType(uri) === "video" ? "video" : "audio",
       });
     }
 
@@ -329,14 +377,17 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
 
       const dir = path.dirname(uri.fsPath);
       const relativeDir = vscode.workspace.asRelativePath(dir);
-      
+
       if (!fontsByFolder.has(relativeDir)) {
         fontsByFolder.set(relativeDir, []);
       }
 
-      const familyName = await this.getFontFamilyFromFile(uri) || 
-                         path.basename(uri.fsPath, path.extname(uri.fsPath));
-      const charset = await this.extractFontCharsetFromSources([uri]) || AssetViewProvider.FONT_CHARSET;
+      const familyName =
+        (await this.getFontFamilyFromFile(uri)) ||
+        path.basename(uri.fsPath, path.extname(uri.fsPath));
+      const charset =
+        (await this.extractFontCharsetFromSources([uri])) ||
+        AssetViewProvider.FONT_CHARSET;
 
       fontsByFolder.get(relativeDir)!.push({
         path: uri.fsPath,
@@ -348,7 +399,7 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
         charset: charset.slice(0, 100),
         fullCharset: charset,
         previewCharset: charset.slice(0, 120),
-        uri: this.webviewView!.webview.asWebviewUri(uri).toString()
+        uri: this.webviewView!.webview.asWebviewUri(uri).toString(),
       });
     }
 
@@ -364,22 +415,22 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
 
       const dir = path.dirname(uri.fsPath);
       const relativeDir = vscode.workspace.asRelativePath(dir);
-      
+
       if (!officeByFolder.has(relativeDir)) {
         officeByFolder.set(relativeDir, []);
       }
 
       const ext = path.extname(uri.fsPath).toLowerCase();
-      let fileType: 'word' | 'excel' | 'powerpoint' | 'pdf' = 'pdf';
-      
-      if (['.docx', '.doc'].includes(ext)) {
-        fileType = 'word';
-      } else if (['.xlsx', '.xls'].includes(ext)) {
-        fileType = 'excel';
-      } else if (['.pptx', '.ppt'].includes(ext)) {
-        fileType = 'powerpoint';
-      } else if (ext === '.pdf') {
-        fileType = 'pdf';
+      let fileType: "word" | "excel" | "powerpoint" | "pdf" = "pdf";
+
+      if ([".docx", ".doc"].includes(ext)) {
+        fileType = "word";
+      } else if ([".xlsx", ".xls"].includes(ext)) {
+        fileType = "excel";
+      } else if ([".pptx", ".ppt"].includes(ext)) {
+        fileType = "powerpoint";
+      } else if (ext === ".pdf") {
+        fileType = "pdf";
       }
 
       const fileData = {
@@ -389,9 +440,9 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
         ext: path.extname(uri.fsPath).replace(".", "").toUpperCase(),
         relativePath: vscode.workspace.asRelativePath(uri.fsPath),
         uri: this.webviewView!.webview.asWebviewUri(uri).toString(),
-        fileType
+        fileType,
       };
-      
+
       log(`✅ 添加办公文档: ${fileData.name} (${fileData.fileType})`);
       officeByFolder.get(relativeDir)!.push(fileData);
     }
@@ -405,7 +456,7 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
 
       const dir = path.dirname(uri.fsPath);
       const relativeDir = vscode.workspace.asRelativePath(dir);
-      
+
       if (!othersByFolder.has(relativeDir)) {
         othersByFolder.set(relativeDir, []);
       }
@@ -415,34 +466,33 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
         name: path.basename(uri.fsPath),
         size: toHumanSize(stat.size),
         ext: path.extname(uri.fsPath).replace(".", "").toUpperCase(),
-        relativePath: vscode.workspace.asRelativePath(uri.fsPath)
+        relativePath: vscode.workspace.asRelativePath(uri.fsPath),
       });
     }
 
     return {
       images: Array.from(imagesByFolder.entries()).map(([folder, files]) => ({
         folder,
-        files
+        files,
       })),
       media: Array.from(mediaByFolder.entries()).map(([folder, files]) => ({
         folder,
-        files
+        files,
       })),
       fonts: Array.from(fontsByFolder.entries()).map(([folder, files]) => ({
         folder,
-        files
+        files,
       })),
       office: Array.from(officeByFolder.entries()).map(([folder, files]) => ({
         folder,
-        files
+        files,
       })),
       others: Array.from(othersByFolder.entries()).map(([folder, files]) => ({
         folder,
-        files
-      }))
+        files,
+      })),
     };
   }
-
   /**
    * 错误提示页面
    */
@@ -481,9 +531,6 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
     `;
   }
 
-
-
-
   private categorizeAssets(assets: vscode.Uri[]) {
     const images: vscode.Uri[] = [];
     const audios: vscode.Uri[] = [];
@@ -493,11 +540,19 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
     const others: vscode.Uri[] = [];
 
     // 办公文档扩展名
-    const officeExtensions = ['.docx', '.doc', '.pdf', '.xlsx', '.xls', '.pptx', '.ppt'];
+    const officeExtensions = [
+      ".docx",
+      ".doc",
+      ".pdf",
+      ".xlsx",
+      ".xls",
+      ".pptx",
+      ".ppt",
+    ];
 
     for (const uri of assets) {
       const ext = path.extname(uri.fsPath).toLowerCase();
-      
+
       if (officeExtensions.includes(ext)) {
         log(`📄 发现办公文档: ${uri.fsPath}`);
         office.push(uri);
@@ -511,7 +566,9 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
       }
     }
 
-    log(`📊 资源分类统计: 图片=${images.length}, 音频=${audios.length}, 视频=${videos.length}, 字体=${fonts.length}, 办公=${office.length}, 其他=${others.length}`);
+    log(
+      `📊 资源分类统计: 图片=${images.length}, 音频=${audios.length}, 视频=${videos.length}, 字体=${fonts.length}, 办公=${office.length}, 其他=${others.length}`,
+    );
     return { images, audios, videos, fonts, office, others };
   }
 
@@ -524,7 +581,7 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
   }
 
   private async extractFontCharsetFromSources(
-    sources: vscode.Uri[]
+    sources: vscode.Uri[],
   ): Promise<string | undefined> {
     if (!sources.length) return undefined;
 
@@ -553,7 +610,9 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
             // 方法2: 手动遍历 cmap 表获取字符映射
             const cmap = font.characterToGlyphIndexMap;
             if (cmap) {
-              codePoints = Object.keys(cmap).map(k => parseInt(k, 10)).filter(cp => cp > 0);
+              codePoints = Object.keys(cmap)
+                .map((k) => parseInt(k, 10))
+                .filter((cp) => cp > 0);
             }
           }
 
@@ -584,7 +643,8 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
           try {
             const ch = String.fromCodePoint(cp);
             // 只过滤掉控制字符（除了空格和换行）
-            if (cp < 32 && cp !== 9 && cp !== 10 && cp !== 13 && cp !== 32) continue;
+            if (cp < 32 && cp !== 9 && cp !== 10 && cp !== 13 && cp !== 32)
+              continue;
             chars.push(ch);
           } catch (err) {
             // 忽略无效的码点
@@ -600,8 +660,8 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
         });
 
         const unique = Array.from(new Set(sortedChars)).join("");
-        log('unique=============')
-        log(unique)
+        log("unique=============");
+        log(unique);
         // const limited = unique.slice(0, 2000);
         const limited = unique;
         this.fontCharsetCache.set(cacheKey, limited);
@@ -614,7 +674,9 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
     return undefined;
   }
 
-  private async getFontFamilyFromFile(uri: vscode.Uri): Promise<string | undefined> {
+  private async getFontFamilyFromFile(
+    uri: vscode.Uri,
+  ): Promise<string | undefined> {
     try {
       // 确保文件存在
       const stat = await statSafe(uri);

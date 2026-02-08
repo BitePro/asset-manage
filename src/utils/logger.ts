@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-const channel = vscode.window.createOutputChannel("AssetLens");
+const channel = vscode.window.createOutputChannel("Asset Manage");
 
 export function log(info: string) {
   channel.appendLine(info);
