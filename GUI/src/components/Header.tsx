@@ -6,11 +6,11 @@ interface HeaderProps {
   onRefresh: () => void;
 }
 
-export default function Header({ stats, isRefreshing, onRefresh }: HeaderProps) {
+export default function Header({ isRefreshing, onRefresh }: HeaderProps) {
   return (
     <div className="header">
       <div>
-        <div className="title">📦 静态资源面板</div>
+        <div className="title">📦 静态资源</div>
       </div>
       <div className="header-actions">
         <button 

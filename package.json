@@ -5,10 +5,22 @@
   "version": "0.1.0",
   "publisher": "zqt",
   "icon": "icon.png",
-  "engines": { "vscode": "^1.90.0" },
-  "categories": ["Other"],
-  "keywords": ["asset", "image", "font", "preview", "media", "resource", "sidebar"],
-  "activationEvents": ["*"],
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "asset",
+    "image",
+    "font",
+    "preview",
+    "media",
+    "resource",
+    "sidebar"
+  ],
+  "activationEvents": [],
   "main": "./out/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -21,25 +33,55 @@
       ]
     },
     "commands": [
-      { "command": "assetManage.refreshIndexes", "title": "Asset Manage: 重新扫描资源索引" },
-      { "command": "assetManage.previewFontInSidebar", "title": "字体预览" },
-      { "command": "assetManage.showImageGallery", "title": "Asset Manage: 查看静态资源", "icon": "$(file-media)" },
-      { "command": "assetManage.openImagesSidebar", "title": "Asset Manage: 打开静态资源（侧边栏）" }
+      {
+        "command": "assetManage.refreshIndexes",
+        "title": "Asset Manage"
+      },
+      {
+        "command": "assetManage.previewFontInSidebar",
+        "title": "字体预览"
+      },
+      {
+        "command": "assetManage.showImageGallery",
+        "title": "Asset Manage: 查看静态资源",
+        "icon": "$(file-media)"
+      },
+      {
+        "command": "assetManage.openImagesSidebar",
+        "title": "Asset Manage: 打开静态资源（侧边栏）"
+      }
     ],
     "keybindings": [
-      { "command": "assetManage.showImageGallery", "key": "ctrl+alt+a", "mac": "cmd+alt+a", "when": "true" }
+      {
+        "command": "assetManage.showImageGallery",
+        "key": "ctrl+alt+a",
+        "mac": "cmd+alt+a",
+        "when": "true"
+      }
     ],
     "views": {
       "assetmanage": [
-        { "id": "assetManage.imagesView", "type": "webview", "name": "静态资源" }
+        {
+          "id": "assetManage.imagesView",
+          "type": "webview",
+          "name": "静态资源"
+        }
       ]
     },
     "menus": {
       "explorer/context": [
-        { "command": "assetManage.previewFontInSidebar", "group": "navigation@5", "when": "resourceExtname =~ /\\.(ttf|otf|woff|woff2)$/i" }
+        {
+          "command": "assetManage.previewFontInSidebar",
+          "group": "navigation@5",
+          "when": "resourceExtname =~ /\\.(ttf|otf|woff|woff2)$/i"
+        }
       ],
       "view/title": [
-        { "command": "assetManage.refreshIndexes", "when": "view == assetManage.imagesView", "group": "navigation" }
+        {
+          "command": "assetManage.refreshIndexes",
+          "when": "view == assetManage.imagesView",
+          "group": "navigation"
+        }
       ]
     },
     "configuration": {
@@ -48,12 +90,19 @@
       "properties": {
         "assetManage.scanInclude": {
           "type": "array",
-          "default": ["**/*"],
+          "default": [
+            "**/*"
+          ],
           "description": "参与资源扫描的 glob 列表。"
         },
         "assetManage.scanExclude": {
           "type": "array",
-          "default": ["**/node_modules/**", "**/.git/**", "**/dist/**", "**/build/**"],
+          "default": [
+            "**/node_modules/**",
+            "**/.git/**",
+            "**/dist/**",
+            "**/build/**"
+          ],
           "description": "资源扫描排除的 glob 列表。"
         }
       }
@@ -70,7 +119,8 @@
   },
   "dependencies": {
     "fast-glob": "^3.3.2",
-    "fontkit": "^2.0.2"
+    "fontkit": "^2.0.2",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/chai": "^5.2.3",
@@ -85,7 +135,12 @@
     "typescript": "^5.3.3"
   },
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/YOUR_USERNAME/asset-manage.git" },
-  "bugs": { "url": "https://github.com/YOUR_USERNAME/asset-manage/issues" },
-  "homepage": "https://github.com/YOUR_USERNAME/asset-manage#readme"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BitePro/asset-manage"
+  },
+  "bugs": {
+    "url": "https://github.com/BitePro/asset-manage/issues"
+  },
+  "homepage": "https://github.com/BitePro/asset-manage"
 }

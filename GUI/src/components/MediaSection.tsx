@@ -18,7 +18,6 @@ export default function MediaSection({
   data,
   searchQuery, 
   onReveal, 
-  onOpenFile
 }: MediaSectionProps) {
   const [folders, setFolders] = useState<FolderGroup[]>([]);
 
@@ -94,9 +93,6 @@ export default function MediaSection({
                 </div>
                 <div className="media-meta">📦 {file.size}</div>
                 <div className="card-actions">
-                  {/* <button className="btn secondary" onClick={() => onOpenFile(file.path)}>
-                    打开文件
-                  </button> */}
                   <button className="btn secondary" onClick={() => onReveal(file.path)}>
                     资源定位
                   </button>

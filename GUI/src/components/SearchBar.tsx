@@ -7,7 +7,7 @@ interface SearchBarProps {
 
 export default function SearchBar({ value, onChange }: SearchBarProps) {
   const [localValue, setLocalValue] = useState(value);
-  const [resultCount, setResultCount] = useState<number | null>(null);
+  
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -38,7 +38,6 @@ export default function SearchBar({ value, onChange }: SearchBarProps) {
   const handleClear = () => {
     setLocalValue('');
     onChange('');
-    setResultCount(null);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

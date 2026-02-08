@@ -18,7 +18,6 @@ export default function OtherSection({
   data,
   searchQuery, 
   onReveal, 
-  onOpenFile
 }: OtherSectionProps) {
   const [folders, setFolders] = useState<FolderGroup[]>([]);
 
