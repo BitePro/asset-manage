@@ -2,7 +2,7 @@
   "name": "asset-manage",
   "displayName": "Asset Manage",
   "description": "静态资源侧边栏与预览。Sidebar and preview for images, fonts, media and documents.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "zqt",
   "icon": "icon.png",
   "galleryBanner": {
