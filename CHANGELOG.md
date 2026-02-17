@@ -1,11 +1,13 @@
-# Changelog
+# Change Log
 
-## [0.1.0] - 2025-02-08
+All notable changes to the "Asset Manage" extension will be documented in this file.
+
+## [0.1.0] - 2026-02-17
 
 ### Added
-
-- 静态资源侧边栏：按图片、媒体、字体、Office、其他分类展示工作区资源
-- 侧边栏内预览：图片、PDF、Word(docx)、Excel(xlsx)
-- 字体预览：右键字体文件可跳转到侧边栏并定位
-- 状态栏入口与快捷键 `Ctrl+Alt+A` / `Cmd+Alt+A` 打开面板
-- 配置项：`assetManage.scanInclude`、`assetManage.scanExclude`
+- 初始版本发布
+- 静态资源侧边栏功能
+- 图片、媒体、字体、Office 文档预览
+- 字体文件右键预览功能
+- 快捷键支持（Ctrl+Alt+A / Cmd+Alt+A）
+- 资源扫描配置选项

@@ -342,6 +342,8 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
         ext: path.extname(img.fsPath).slice(1).toUpperCase(),
         uri: this.webviewView!.webview.asWebviewUri(img).toString(),
         relativePath: vscode.workspace.asRelativePath(img.fsPath),
+        sizeBytes: stat.size,
+        hash: this.getFileHash(img.fsPath),
       });
     }
 
@@ -723,5 +725,19 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
 
   private normalizePath(p: string) {
     return p.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+  }
+
+  private getFileHash(filePath: string): string {
+    try {
+      const fs = require("fs");
+      const crypto = require("crypto");
+      const buffer = fs.readFileSync(filePath);
+      const hash = crypto.createHash("md5");
+      hash.update(buffer);
+      return hash.digest("hex");
+    } catch (err) {
+      log(`计算文件哈希失败: ${filePath}, ${err}`);
+      return "";
+    }
   }
 }

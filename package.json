@@ -5,11 +5,15 @@
   "version": "0.1.0",
   "publisher": "zqt",
   "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": [
-    "Other"
+    "Visualization"
   ],
   "keywords": [
     "asset",
@@ -18,7 +22,18 @@
     "preview",
     "media",
     "resource",
-    "sidebar"
+    "sidebar",
+    "静态资源",
+    "图片",
+    "媒体",
+    "字体",
+    "Office",
+    "其他",
+    "预览",
+    "侧边栏",
+    "静态资源管理",
+    "静态资源预览",
+    "静态资源侧边栏"
   ],
   "activationEvents": [],
   "main": "./out/extension.js",

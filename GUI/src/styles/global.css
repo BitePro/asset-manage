@@ -1,5 +1,5 @@
 * {
-    margin: 0;
+  margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
@@ -270,7 +270,7 @@
   /* Gallery (Images) */
   .gallery {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 10px;
   }
   
@@ -281,20 +281,31 @@
     background: var(--vscode-sideBar-background);
     transition: all 0.2s ease;
     cursor: pointer;
+  position: relative;
   }
   
-  .card:hover {
-    transform: translateY(-2px);
+  .card-tags {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.card:hover {
+  /* transform: translateY(-2px); */
     border-color: var(--vscode-focusBorder);
   }
-  
+
   .img-container {
     width: 100%;
     height: 78px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: repeating-conic-gradient(rgba(128, 128, 128, 0.08) 0% 25%, transparent 0% 50%) 50% / 10px 10px;
+  background: repeating-conic-gradient(rgba(128, 128, 128, 0.08) 0% 25%,
+        transparent 0% 50%) 50% / 10px 10px;
     overflow: hidden;
   }
   
@@ -395,340 +406,331 @@
     font-size: 13px;
     color: var(--vscode-foreground);
   }
-  
-  .badge {
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background: var(--vscode-badge-background);
-    color: var(--vscode-badge-foreground);
-  }
-  
-  .muted {
-    color: var(--vscode-descriptionForeground);
-    font-size: 12px;
-  }
-  
-  /* Font Section */
-  .font-family {
-    font-size: 12px;
-    color: var(--vscode-descriptionForeground);
-    font-weight: normal;
-    margin-bottom: 8px;
-  }
-  
-  .font-preview {
-    padding: 10px;
-    border-radius: 6px;
-    border: 1px dashed var(--vscode-panel-border);
-    background: var(--vscode-editor-background);
-    line-height: 1.4;
-    word-break: break-word;
-    white-space: pre-wrap;
-    max-height: 260px;
-    overflow-y: auto;
-  }
-  
-  .font-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  .font-size-control {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--vscode-descriptionForeground);
-  }
-  
-  .font-size-control input[type="range"] {
-    width: 140px;
-    accent-color: #4da3ff;
-  }
-  
-  .font-size-value {
-    min-width: 44px;
-    text-align: right;
-  }
-  
-  /* Office Section */
-  .office-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 12px;
-  }
-  
-  .office-card {
-    border: 1px solid var(--vscode-panel-border);
-    border-radius: 8px;
-    padding: 12px;
-    background: var(--vscode-sideBar-background);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .office-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    font-size: 13px;
-    color: var(--vscode-foreground);
-  }
-  
-  .office-type {
-    font-size: 12px;
-    color: var(--vscode-descriptionForeground);
-    font-style: italic;
-  }
-  
-  .office-meta {
-    font-size: 12px;
-    color: var(--vscode-descriptionForeground);
-  }
-  
-  .pdf-preview-container {
-    width: 90%;
-    height: 90%;
-    max-width: 1200px;
-    max-height: 90vh;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-  }
-  
-  .pdf-preview-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-  
-  /* Other Section */
-  .other-path {
-    word-break: break-all;
-  }
-  
-  /* Empty State */
-  .empty {
-    padding: 32px 18px;
-    border: 1px dashed var(--vscode-panel-border);
-    border-radius: 8px;
-    text-align: center;
-    color: var(--vscode-descriptionForeground);
-    background: var(--vscode-sideBar-background);
-  }
-  
-  /* Preview Overlay */
-  .preview-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-    --preview-bg: rgba(0, 0, 0, 0.9);
-    background: var(--preview-bg);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    cursor: zoom-out;
-  }
-  
-  .preview-overlay.active {
-    display: flex;
-  }
-  
-  .preview-image {
-    max-width: 90%;
-    max-height: 90%;
-    min-width: 70%;
-    min-height: 70%;
-    object-fit: contain;
-    border-radius: 8px;
-    /* box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); */
-  }
-  
-  .preview-info {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-  }
-  
-  .preview-header {
-    position: fixed;
-    top: 20px;
-    left: 0;
-    right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  /* 背景颜色控制器 */
-  .preview-bg-control {
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
-    color: #fff;
-    padding: 12px 20px;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-    user-select: none;
-    z-index: 1001;
-  }
-  
-  .preview-close {
-    margin-right: 18px;
-  }
-  
-  .preview-bg-control .control-label {
-    font-size: 13px;
-    opacity: 0.9;
-    font-weight: 500;
-    flex-shrink: 0;
-  }
-  
-  .preview-bg-control .control-icon {
-    font-size: 18px;
-    opacity: 0.8;
-  }
-  
-  .preview-bg-control .bg-slider {
-    width: 150px;
-    height: 6px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: linear-gradient(to right, #000, #fff);
-    border-radius: 3px;
-    outline: none;
-    cursor: pointer;
-  }
-  
-  .preview-bg-control .bg-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #fff;
-    border: 2px solid rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    transition: transform 0.1s ease;
-  }
-  
-  .preview-bg-control .bg-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.15);
-  }
-  
-  .preview-bg-control .bg-slider::-webkit-slider-thumb:active {
-    transform: scale(0.95);
-  }
-  
-  .preview-bg-control .bg-slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #fff;
-    border: 2px solid rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    transition: transform 0.1s ease;
-  }
-  
-  .preview-bg-control .bg-slider::-moz-range-thumb:hover {
-    transform: scale(1.15);
-  }
-  
-  .preview-bg-control .bg-slider::-moz-range-thumb:active {
-    transform: scale(0.95);
-  }
-  .preview-controls {
-    position: fixed;
-    top: 10px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.6);
-    color: #fff;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(6px);
-    user-select: none;
-  }
-  
-  .preview-control-label {
-    font-size: 12px;
-    opacity: 0.85;
-  }
-  
-  .preview-control-value {
-    font-size: 12px;
-    opacity: 0.85;
-    min-width: 48px;
-    text-align: right;
-  }
-  
-  .preview-controls input[type="range"] {
-    width: 180px;
-    accent-color: #4da3ff;
-  }
-  
-  /* Document Preview Styles */
-  .document-preview-container {
-    color: var(--vscode-editor-foreground);
-  }
-  
-  /* DOCX Preview Styles (docx-preview) */
-  .docx-preview-wrapper {
-    width: 100%;
-    min-height: 100%;
-    overflow-x: hidden;
-      overflow-y: auto;
-    box-sizing: border-box;
-    padding: 0 10px;
-      /* 左右各10px内边距 */
-  }
-  
-  /* docx-preview 生成的 wrapper */
-  .docx-preview-wrapper .docx-wrapper {
-    background: white;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    box-sizing: border-box;
-    transform-origin: top center;
-    margin: 0 auto;
-    padding: 0;
-    background-color: transparent;
-  }
-    
-    /* docx-preview 的 section（页面） */
-    .docx-preview-wrapper .docx-wrapper>section.docx {
-    background: white;
-    box-sizing: border-box;
-    position: relative;
-    margin-bottom: 0;
-  }
-  
-  /* 文档内容通用样式 */
-  .docx-preview-wrapper .docx {
-    color: #000;
-    font-family: 'Calibri', 'Arial', 'Microsoft YaHei', sans-serif;
-      font-size: 11pt;
-      line-height: 1.15;
+.muted {
+  color: var(--vscode-descriptionForeground);
+  font-size: 12px;
+}
+
+/* Font Section */
+.font-family {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  font-weight: normal;
+  margin-bottom: 8px;
+}
+
+.font-preview {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px dashed var(--vscode-panel-border);
+  background: var(--vscode-editor-background);
+  line-height: 1.4;
+  word-break: break-word;
+  white-space: pre-wrap;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.font-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.font-size-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.font-size-control input[type="range"] {
+  width: 140px;
+  accent-color: #4da3ff;
+}
+
+.font-size-value {
+  min-width: 44px;
+  text-align: right;
+}
+
+/* Office Section */
+.office-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.office-card {
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--vscode-sideBar-background);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.office-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--vscode-foreground);
+}
+
+.office-type {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  font-style: italic;
+}
+
+.office-meta {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.pdf-preview-container {
+  width: 90%;
+  height: 90%;
+  max-width: 1200px;
+  max-height: 90vh;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.pdf-preview-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* Other Section */
+.other-path {
+  word-break: break-all;
+}
+
+/* Empty State */
+.empty {
+  padding: 32px 18px;
+  border: 1px dashed var(--vscode-panel-border);
+  border-radius: 8px;
+  text-align: center;
+  color: var(--vscode-descriptionForeground);
+  background: var(--vscode-sideBar-background);
+}
+
+/* Preview Overlay */
+.preview-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  --preview-bg: rgba(0, 0, 0, 0.9);
+  background: var(--preview-bg);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+}
+
+.preview-overlay.active {
+  display: flex;
+}
+
+.preview-image {
+  max-width: 90%;
+  max-height: 90%;
+  min-width: 70%;
+  min-height: 70%;
+  object-fit: contain;
+  border-radius: 8px;
+  /* box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5); */
+}
+
+.preview-info {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.preview-header {
+  position: fixed;
+  top: 20px;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 背景颜色控制器 */
+.preview-bg-control {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  user-select: none;
+  z-index: 1001;
+}
+
+.preview-close {
+  margin-right: 18px;
+}
+
+.preview-bg-control .control-label {
+  font-size: 13px;
+  opacity: 0.9;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+.preview-bg-control .control-icon {
+  font-size: 18px;
+  opacity: 0.8;
+}
+
+.preview-bg-control .bg-slider {
+  width: 150px;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: linear-gradient(to right, #000, #fff);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.preview-bg-control .bg-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease;
+}
+
+.preview-bg-control .bg-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+}
+
+.preview-bg-control .bg-slider::-webkit-slider-thumb:active {
+  transform: scale(0.95);
+}
+
+.preview-bg-control .bg-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: transform 0.1s ease;
+}
+
+.preview-bg-control .bg-slider::-moz-range-thumb:hover {
+  transform: scale(1.15);
+}
+
+.preview-bg-control .bg-slider::-moz-range-thumb:active {
+  transform: scale(0.95);
+}
+
+.preview-controls {
+  position: fixed;
+  top: 10px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(6px);
+  user-select: none;
+}
+
+.preview-control-label {
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+.preview-control-value {
+  font-size: 12px;
+  opacity: 0.85;
+  min-width: 48px;
+  text-align: right;
+}
+
+.preview-controls input[type="range"] {
+  width: 180px;
+  accent-color: #4da3ff;
+}
+
+/* Document Preview Styles */
+.document-preview-container {
+  color: var(--vscode-editor-foreground);
+}
+
+/* DOCX Preview Styles (docx-preview) */
+.docx-preview-wrapper {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 0 10px;
+  /* 左右各10px内边距 */
+}
+
+/* docx-preview 生成的 wrapper */
+.docx-preview-wrapper .docx-wrapper {
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-sizing: border-box;
+  transform-origin: top center;
+  margin: 0 auto;
+  padding: 0;
+  background-color: transparent;
+}
+
+/* docx-preview 的 section（页面） */
+.docx-preview-wrapper .docx-wrapper>section.docx {
+  background: white;
+  box-sizing: border-box;
+  position: relative;
+  margin-bottom: 0;
+}
+
+/* 文档内容通用样式 */
+.docx-preview-wrapper .docx {
+  color: #000;
+  font-family: "Calibri", "Arial", "Microsoft YaHei", sans-serif;
+    font-size: 11pt;
+    line-height: 1.15;
   }
   
   /* 段落 */
@@ -792,24 +794,419 @@
     max-width: 100%;
     height: auto;
     display: block;
-    }
-    
-    /* 分页 */
-    .docx-preview-wrapper .docx-wrapper>section.docx+section.docx {
-      margin-top: 20px;
-    }
-    
-    /* 页眉页脚 */
-    .docx-preview-wrapper .docx .docx-header,
-    .docx-preview-wrapper .docx .docx-footer {
-      font-size: 9pt;
-      color: #666;
-    }
-    
-    /* 超链接 */
-    .docx-preview-wrapper .docx a {
-      color: #0563C1;
-      text-decoration: underline;
+  }
+  
+  /* 分页 */
+.docx-preview-wrapper .docx-wrapper>section.docx+section.docx {
+  margin-top: 20px;
+}
+/* 排序控制 */
+.search-container {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--vscode-editor-background);
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.search-wrapper {
+  flex: 1;
+}
+
+.sort-container {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.sort-btn-wide {
+  background: var(--vscode-dropdown-background);
+  color: var(--vscode-dropdown-foreground);
+  border: 1px solid var(--vscode-dropdown-border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  transition: all 0.2s;
+  min-width: 110px;
+  justify-content: space-between;
+}
+
+.sort-btn-wide:hover {
+  border-color: var(--vscode-focusBorder);
+}
+
+.dropdown-arrow {
+  font-size: 8px;
+  opacity: 0.7;
+}
+
+.sort-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: var(--vscode-menu-background);
+  color: var(--vscode-menu-foreground);
+  border: 1px solid var(--vscode-menu-border);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  min-width: 120px;
+  padding: 4px 0;
+}
+
+.sort-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.sort-item:hover {
+  background: var(--vscode-menu-selectionBackground);
+  color: var(--vscode-menu-selectionForeground);
+}
+
+.sort-item.active {
+  color: var(--vscode-textLink-foreground);
+  font-weight: 600;
+}
+
+.sort-divider {
+  height: 1px;
+  background: var(--vscode-menu-separatorBackground);
+  margin: 4px 0;
+}
+
+/* 配置行 (阈值设置) */
+.config-row {
+  padding: 0 0 16px 0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.threshold-setting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--vscode-sideBar-background);
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--vscode-panel-border);
+}
+.setting-label {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.threshold-input {
+  width: 60px;
+  background: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 2px;
+  padding: 2px 4px;
+  font-size: 11px;
+}
+
+.threshold-unit {
+  background: var(--vscode-dropdown-background);
+  color: var(--vscode-dropdown-foreground);
+  border: 1px solid var(--vscode-dropdown-border);
+  border-radius: 2px;
+  padding: 1px 4px;
+  font-size: 11px;
+}
+
+/* 状态标记 */
+.card {
+  position: relative;
+  min-height: 150px;
+  /* 调整为更紧凑的高度，仅容纳按钮 */
+  display: flex;
+  flex-direction: column;
+}
+
+.card.warning {
+  border-color: #f1c40f !important;
+}
+
+.card.duplicate {
+  border-color: #3498db !important;
+}
+
+/* 同时具备大文件和重复状态的边框色 - 黄绿中间色 */
+.card.warning.duplicate {
+  border-color: #a2d149 !important;
+  /* 柠檬绿/黄绿色 */
+}
+
+.badge {
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  pointer-events: auto;
+  z-index: 1000;
+  margin-left: 3px;
+  height: 18px;
+  line-height: 18px;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+}
+
+.badge.warning {
+  background: #f1c40f;
+  color: #000;
+  cursor: help;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge.chongfu {
+  padding: 2px 3px;
+  height: 18px;
+  line-height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--vscode-button-background);
+}
+
+.badge.duplicate.static {
+  background: #3498db;
+  color: #fff;
+}
+
+.card-info {
+  flex: 1;
+}
+
+.card-actions {
+  padding: 4px 8px;
+  display: flex;
+  justify-content: center;
+}
+
+.action-duplicate {
+  width: 100%;
+  justify-content: center;
+  font-size: 11px;
+  height: 24px;
+}
+
+.text-warning {
+  color: #f1c40f;
+}
+
+/* 弹窗样式 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  backdrop-filter: blur(2px);
+}
+
+.modal-content {
+  background: var(--vscode-sideBar-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* 弹窗结构优化 */
+.modal-content.wide {
+  max-width: 520px;
+}
+
+.modal-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--vscode-descriptionForeground);
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-body {
+  padding: 8px;
+  overflow-y: auto;
+}
+
+.modal-body.structured {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-section {
+  padding: 16px;
+}
+
+.modal-section.current {
+  background: var(--vscode-sideBar-background);
+  border-bottom: 1px solid var(--vscode-panel-border);
+  padding: 12px 16px;
+}
+
+.modal-section.duplicates {
+  flex: 1;
+  background: var(--vscode-list-hoverBackground);
+  opacity: 0.95;
+}
+
+.section-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--vscode-descriptionForeground);
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.duplicate-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.duplicate-item {
+  display: flex;
+  gap: 12px;
+  padding: 10px;
+  background: var(--vscode-list-hoverBackground);
+  border-radius: 6px;
+  align-items: center;
+}
+
+.duplicate-item.with-preview {
+  gap: 12px;
+}
+
+.dup-preview {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: repeating-conic-gradient(rgba(128, 128, 128, 0.08) 0% 25%,
+      transparent 0% 50%) 50% / 8px 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.dup-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.dup-mini-preview {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  background: repeating-conic-gradient(rgba(128, 128, 128, 0.08) 0% 25%,
+      transparent 0% 50%) 50% / 6px 6px;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--vscode-panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dup-mini-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.dup-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dup-name {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dup-path {
+  font-size: 10px;
+  color: var(--vscode-descriptionForeground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.dup-meta {
+  font-size: 10px;
+  color: var(--vscode-descriptionForeground);
+  margin-top: 2px;
+}
+
+.file-path-hint {
+  font-size: 10px;
+  opacity: 0.7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.tiny {
+  padding: 2px 6px;
+  font-size: 10px;
+}
+/* 页眉页脚 */
+.docx-preview-wrapper .docx .docx-header,
+.docx-preview-wrapper .docx .docx-footer {
+  font-size: 9pt;
+  color: #666;
+}
+
+/* 超链接 */
+.docx-preview-wrapper .docx a {
+  color: #0563c1;
+    text-decoration: underline;
   }
   
   /* Excel Preview Styles */
@@ -829,9 +1226,110 @@
   .excel-content {
     overflow: auto;
   }
-  
-  #excel-table {
-    min-width: 100%;
-    font-family: var(--vscode-font-family);
-    font-size: 12px;
+.badge-icon {
+  font-size: 10px;
+}
+
+/* 弹窗结构优化 */
+.modal-content.wide {
+  max-width: 500px;
+}
+
+.modal-body.structured {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-section {
+  padding: 16px;
+}
+
+.modal-section.current {
+  background: var(--vscode-sideBar-background);
+  border-bottom: 2px solid var(--vscode-panel-border);
+}
+
+.modal-section.duplicates {
+  flex: 1;
+  background: var(--vscode-list-hoverBackground);
+  opacity: 0.95;
+}
+
+.section-header {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--vscode-descriptionForeground);
+  margin-bottom: 12px;
+  letter-spacing: 0.5px;
+}
+
+.current-image-card {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.current-preview {
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+  background: repeating-conic-gradient(rgba(128, 128, 128, 0.08) 0% 25%,
+      transparent 0% 50%) 50% / 10px 10px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--vscode-panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.current-preview img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.modal-folder-group {
+  margin-bottom: 20px;
+}
+
+.modal-folder-title {
+  font-size: 12px;
+  font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--vscode-foreground);
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
+  
+  .duplicate-item.small {
+    display: flex;
+    gap: 12px;
+    padding: 6px 10px;
+    margin-bottom: 4px;
+    background: var(--vscode-sideBar-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 4px;
+    align-items: center;
+  }
+  
+  .tiny {
+    padding: 2px 6px;
+    font-size: 10px;
+  }
+  
+  .dup-meta-inline {
+    font-size: 10px;
+    color: var(--vscode-descriptionForeground);
+    margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .chongfu-action {
+    color: rgb(29, 110, 197);
+}
