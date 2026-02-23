@@ -2,7 +2,7 @@
   "name": "asset-manage",
   "displayName": "Asset Manage",
   "description": "%extension.description%",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "zqt",
   "icon": "icon.png",
   "galleryBanner": {
