@@ -12,7 +12,7 @@
 
 ## 演示视频 / Demo
 
-![使用演示](resources/guide.gif)
+![使用演示](resources/guide20260223.gif)
 
 ---
 
