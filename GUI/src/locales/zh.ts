@@ -31,6 +31,7 @@ export const zh = {
   viewDuplicates: '查看重复',
   imagesCount: (n: number) => `${n} 张`,
   background: '背景：',
+  backgroundBrightness: '背景亮度：',
   close: '关闭',
 
   // MediaSection

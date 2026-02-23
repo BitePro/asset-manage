@@ -31,6 +31,7 @@ export const en = {
   viewDuplicates: 'View duplicates',
   imagesCount: (n: number) => `${n} item(s)`,
   background: 'Background:',
+  backgroundBrightness: 'bg-brightness:',
   close: 'Close',
 
   // MediaSection

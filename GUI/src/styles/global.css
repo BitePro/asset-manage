@@ -208,6 +208,10 @@
   .btn:hover {
     background: var(--vscode-button-hoverBackground);
   }
+  .btn.small {
+    padding: 4px 8px;
+    font-size: 10px;
+  }
   
   .btn.loading {
     opacity: 0.75;
@@ -246,9 +250,14 @@
   }
   
   .tab.active {
-    border-color: var(--vscode-focusBorder);
+    /* border-color: var(--vscode-focusBorder); */
+    /* background: var(--vscode-list-activeSelectionBackground); */
+    /* color: var(--vscode-list-activeSelectionForeground); */
+    
     background: var(--vscode-list-activeSelectionBackground);
     color: var(--vscode-list-activeSelectionForeground);
+    /* 更亮的蓝色 */
+    border-color: #4da3ff;
   }
   
   /* Panels */
@@ -429,6 +438,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 12px;
+    padding-left: 10px;
   }
   
   .media-card,
@@ -442,7 +452,11 @@
     flex-direction: column;
     gap: 8px;
   }
-  
+  .media-preview {
+    padding: 5px 3px;
+    background: var(--vscode-editor-background);
+    border-radius: 6px;
+  }
   .media-preview video,
   .media-preview audio {
     width: 100%;
@@ -515,6 +529,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 12px;
+  padding-left: 10px;
 }
 
 .office-card {
@@ -638,7 +653,7 @@
   right: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
 }
 
 /* 背景颜色控制器 */
@@ -725,7 +740,7 @@
 
 .preview-controls {
   position: fixed;
-  top: 10px;
+  top: 12px;
   right: 20px;
   background: rgba(0, 0, 0, 0.6);
   color: #fff;
@@ -1018,10 +1033,10 @@
   pointer-events: auto;
   z-index: 1000;
   margin-left: 3px;
-  height: 18px;
-  line-height: 18px;
+  height: 16px;
+  line-height: 16px;
   font-size: 10px;
-  padding: 2px 6px;
+  padding: 0px 6px;
   border-radius: 4px;
   background: var(--vscode-badge-background);
   color: var(--vscode-badge-foreground);

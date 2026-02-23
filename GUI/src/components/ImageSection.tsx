@@ -42,7 +42,7 @@ export default function ImageSection({
     name: string;
     size: string;
   } | null>(null);
-  const [bgBrightness, setBgBrightness] = useState(10); // 0-100
+  const [bgBrightness, setBgBrightness] = useState(50); // 0-100
 
   // 将接收到的数据转换为组件内部状态
   useEffect(() => {
@@ -256,7 +256,7 @@ export default function ImageSection({
           </div>
           <div className="preview-header">
             <div className="preview-close">
-              <button className="btn" onClick={closePreview}>
+              <button className="btn small" onClick={closePreview}>
                 {t('close')}
               </button>
             </div>
@@ -267,8 +267,8 @@ export default function ImageSection({
               className="preview-bg-control"
               onClick={(e) => e.stopPropagation()}
             >
-              <span className="control-label">{t('background')}</span>
-              <span className="control-icon">🌑</span>
+              <span className="control-label">{t('backgroundBrightness')}</span>
+              {/* <span className="control-icon">🌑</span> */}
               <input
                 type="range"
                 min="0"
@@ -277,7 +277,7 @@ export default function ImageSection({
                 onChange={(e) => setBgBrightness(Number(e.target.value))}
                 className="bg-slider"
               />
-              <span className="control-icon">🌕</span>
+              {/* <span className="control-icon">🌕</span> */}
             </div>
             
           </div>

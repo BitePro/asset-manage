@@ -91,7 +91,7 @@ export default function OtherSection({
                   {/* <button className="btn secondary" onClick={() => onOpenFile(file.path)}>
                     打开
                   </button> */}
-                  <button className="btn secondary" onClick={() => onReveal(file.path)}>
+                  <button className="btn" onClick={() => onReveal(file.path)}>
                     {t('locateResource')}
                   </button>
                 </div>

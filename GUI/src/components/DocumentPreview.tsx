@@ -400,7 +400,7 @@ export default function DocumentPreview({
             marginRight: '10px'
           }}>
             <button 
-              className="btn secondary" 
+              className="btn small" 
               onClick={goToPrevPage}
               disabled={currentPage === 1}
               style={{ minWidth: '60px' }}
@@ -414,7 +414,7 @@ export default function DocumentPreview({
               {currentPage} / {totalPages}
             </span>
             <button 
-              className="btn secondary" 
+              className="btn small" 
               onClick={goToNextPage}
               disabled={currentPage === totalPages}
               style={{ minWidth: '60px' }}
@@ -424,7 +424,7 @@ export default function DocumentPreview({
           </div>
         )}
         <button 
-          className="btn secondary" 
+          className="btn small" 
           onClick={onClose}
         >
           {t('close')}

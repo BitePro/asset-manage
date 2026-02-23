@@ -228,7 +228,7 @@ export default function FontSection({
                       {getToggleButtonText(fontId)}
                     </button>
                     <button 
-                      className="btn secondary" 
+                      className="btn" 
                       onClick={() => onReveal(font.path)}
                     >
                       {t('locateFont')}

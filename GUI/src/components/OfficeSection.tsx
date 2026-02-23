@@ -128,7 +128,7 @@ export default function OfficeSection({
                 <div className="card-actions">
                   {(file.fileType === 'pdf' || file.fileType === 'word' || file.fileType === 'excel') && (
                     <button 
-                      className="btn secondary" 
+                      className="btn" 
                       onClick={() => handlePreview(file)}
                     >
                       {t('preview')}
@@ -141,7 +141,7 @@ export default function OfficeSection({
                     打开
                   </button> */}
                   <button 
-                    className="btn secondary" 
+                    className="btn" 
                     onClick={() => onReveal(file.path)}
                   >
                     {t('locateResource')}

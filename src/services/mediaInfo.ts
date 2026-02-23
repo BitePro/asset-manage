@@ -5,8 +5,19 @@ import { ResourceType } from "../types";
 export const IMAGE_EXT = [
   "png", "jpg", "jpeg", "gif", "webp", "avif", "bmp", "svg", "ico",
 ];
-export const AUDIO_EXT = ["mp3", "wav", "aac", "flac", "ogg", "m4a", "opus"];
-export const VIDEO_EXT = ["mp4", "mov", "mkv", "webm", "avi"];
+export const AUDIO_EXT = ["mp3", "wav", "aac", "flac", "ogg", "m4a", "wma", "opus"];
+export const VIDEO_EXT = [
+  "mp4",
+  "avi",
+  "mov",
+  "mkv",
+  "wmv",
+  "flv",
+  "webm",
+  "m4v",
+  "mpg",
+  "3gp"
+];
 export const FONT_EXT = ["woff", "woff2", "ttf", "otf", "tff"];
 export const OFFICE_EXT = [
   "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx",

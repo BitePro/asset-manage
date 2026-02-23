@@ -95,7 +95,7 @@ export default function MediaSection({
                 </div>
                 <div className="media-meta">📦 {file.size}</div>
                 <div className="card-actions">
-                  <button className="btn secondary" onClick={() => onReveal(file.path)}>
+                  <button className="btn" onClick={() => onReveal(file.path)}>
                     {t('locateResource')}
                   </button>
                 </div>
