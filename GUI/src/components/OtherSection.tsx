@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AssetFile } from '../types';
+import { useI18n } from '../contexts/I18nContext';
 
 interface OtherSectionProps {
   data: Array<{ folder: string; files: AssetFile[] }>;
@@ -19,6 +20,7 @@ export default function OtherSection({
   searchQuery, 
   onReveal, 
 }: OtherSectionProps) {
+  const { t } = useI18n();
   const [folders, setFolders] = useState<FolderGroup[]>([]);
 
   // 将接收到的数据转换为组件内部状态
@@ -55,8 +57,8 @@ export default function OtherSection({
     return (
       <div className="empty">
         <div style={{ fontSize: '32px', marginBottom: '8px' }}>📂</div>
-        <div style={{ fontWeight: 600, marginBottom: '6px' }}>暂无其他静态资源</div>
-        <div className="muted">支持 txt/json/yaml/psd/ai/zip 等常见格式</div>
+        <div style={{ fontWeight: 600, marginBottom: '6px' }}>{t('noOthers')}</div>
+        <div className="muted">{t('othersFormats')}</div>
       </div>
     );
   }
@@ -69,7 +71,7 @@ export default function OtherSection({
             <span className="folder-toggle">▼</span>
             <span>📁</span>
             <span className="folder-name">{group.folder}</span>
-            <span className="folder-count">{group.files.length} 个</span>
+            <span className="folder-count">{t('itemsCount', group.files.length)}</span>
           </div>
           <div className="other-grid">
             {group.files.map(file => (
@@ -90,7 +92,7 @@ export default function OtherSection({
                     打开
                   </button> */}
                   <button className="btn secondary" onClick={() => onReveal(file.path)}>
-                    资源定位
+                    {t('locateResource')}
                   </button>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { OfficeFile } from '../types';
+import { useI18n } from '../contexts/I18nContext';
 import { renderAsync } from 'docx-preview';
 import * as XLSX from 'xlsx';
 
@@ -21,6 +22,7 @@ export default function DocumentPreview({
   onClose,
   onOpenFile 
 }: DocumentPreviewProps) {
+  const { t } = useI18n();
   const [pdfDoc, setPdfDoc] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
@@ -71,12 +73,12 @@ export default function DocumentPreview({
             await loadXLSX(file);
             break;
           default:
-            setError(`暂不支持预览 ${file.fileType} 格式`);
+            setError(t('unsupportedFormat', file.fileType));
             setIsLoading(false);
         }
       } catch (err) {
         console.error('Error loading document:', err);
-        setError(`加载文档失败: ${err instanceof Error ? err.message : '未知错误'}`);
+        setError(t('loadFailed', err instanceof Error ? err.message : t('unknownError')));
         setIsLoading(false);
       }
     };
@@ -117,7 +119,7 @@ export default function DocumentPreview({
   // 加载 PDF
   const loadPDF = async (file: OfficeFile) => {
     if (!window.pdfjsLib) {
-      throw new Error('PDF.js 库未加载，请刷新页面重试');
+      throw new Error(t('pdfLibNotLoaded'));
     }
 
     console.log('Loading PDF from:', file.uri);
@@ -133,7 +135,7 @@ export default function DocumentPreview({
   // 加载 DOCX
   const loadDOCX = async (file: OfficeFile) => {
     if (!docxContainerRef.current) {
-      throw new Error('DOCX 预览容器未就绪');
+      throw new Error(t('docxContainerNotReady'));
     }
 
     console.log('Loading DOCX from:', file.uri);
@@ -175,7 +177,7 @@ export default function DocumentPreview({
   // 加载 XLSX
   const loadXLSX = async (file: OfficeFile) => {
     if (!previewContainerRef.current) {
-      throw new Error('预览容器未就绪');
+      throw new Error(t('previewContainerNotReady'));
     }
 
     console.log('Loading XLSX from:', file.uri);
@@ -335,7 +337,7 @@ export default function DocumentPreview({
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         if (!context) {
-          throw new Error('无法创建渲染上下文');
+          throw new Error(t('noRenderContext'));
         }
 
         // 计算合适的缩放比例（提高清晰度）
@@ -361,7 +363,7 @@ export default function DocumentPreview({
         setIsLoading(false);
       } catch (err) {
         console.error('Error rendering page:', err);
-        setError(`渲染 PDF 页面失败: ${err instanceof Error ? err.message : '未知错误'}`);
+        setError(t('renderFailed', err instanceof Error ? err.message : t('unknownError')));
         setIsLoading(false);
       }
     };
@@ -403,7 +405,7 @@ export default function DocumentPreview({
               disabled={currentPage === 1}
               style={{ minWidth: '60px' }}
             >
-              上一页
+              {t('prevPage')}
             </button>
             <span style={{ 
               padding: '0 10px',
@@ -417,7 +419,7 @@ export default function DocumentPreview({
               disabled={currentPage === totalPages}
               style={{ minWidth: '60px' }}
             >
-              下一页
+              {t('nextPage')}
             </button>
           </div>
         )}
@@ -425,7 +427,7 @@ export default function DocumentPreview({
           className="btn secondary" 
           onClick={onClose}
         >
-          关闭
+          {t('close')}
         </button>
       </div>
       
@@ -449,7 +451,7 @@ export default function DocumentPreview({
             textAlign: 'center',
             color: 'var(--vscode-foreground)'
           }}>
-            <p>正在加载文档...</p >
+            <p>{t('loadingDoc')}</p>
           </div>
         )}
         
@@ -465,7 +467,7 @@ export default function DocumentPreview({
                 className="btn" 
                 onClick={() => onOpenFile(file.path)}
               >
-                在系统默认应用中打开
+                {t('openInDefaultApp')}
               </button>
             </p >
           </div>
@@ -473,9 +475,9 @@ export default function DocumentPreview({
         
         {/* PDF 预览 */}
         {!isLoading && !error && file.fileType === 'pdf' && pageImageUrl && (
-          < img 
+          <img 
             src={pageImageUrl}
-            alt={`PDF 第 ${currentPage} 页`}
+            alt={t('pdfPage', currentPage, totalPages)}
             style={{
               maxWidth: '100%',
               height: 'auto',
@@ -513,7 +515,7 @@ export default function DocumentPreview({
       
       <div className="preview-info">
         {file.name} · {file.size}
-        {file.fileType === 'pdf' && totalPages > 0 && ` · ${totalPages} 页`}
+        {file.fileType === 'pdf' && totalPages > 0 && ` · ${t('pages', totalPages)}`}
       </div>
     </div>
   );

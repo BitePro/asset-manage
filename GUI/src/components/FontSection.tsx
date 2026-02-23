@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FontFile } from '../types';
+import { useI18n } from '../contexts/I18nContext';
 
 interface FontSectionProps {
   data: Array<{ folder: string; files: FontFile[] }>;
@@ -18,6 +19,7 @@ export default function FontSection({
   searchQuery, 
   onReveal, 
 }: FontSectionProps) {
+  const { t } = useI18n();
   const [folders, setFolders] = useState<FolderGroup[]>([]);
   const [fontSizes, setFontSizes] = useState<Record<string, number>>({});
   const [expandedFonts, setExpandedFonts] = useState<Record<string, { state: 'short' | 'partial' | 'full', length: number }>>({});
@@ -126,9 +128,9 @@ export default function FontSection({
   const getToggleButtonText = (fontId: string) => {
     const expanded = expandedFonts[fontId];
     if (!expanded || expanded.state !== 'full') {
-      return '更多字符集';
+      return t('moreCharset');
     }
-    return '收起字符集';
+    return t('collapseCharset');
   };
 
   // 过滤逻辑
@@ -146,8 +148,8 @@ export default function FontSection({
     return (
       <div className="empty">
         <div style={{ fontSize: '32px', marginBottom: '8px' }}>🔠</div>
-        <div style={{ fontWeight: 600, marginBottom: '6px' }}>未检测到字体文件</div>
-        <div className="muted">项目中暂无字体文件</div>
+        <div style={{ fontWeight: 600, marginBottom: '6px' }}>{t('noFonts')}</div>
+        <div className="muted">{t('noFontsDesc')}</div>
       </div>
     );
   }
@@ -160,7 +162,7 @@ export default function FontSection({
             <span className="folder-toggle">▼</span>
             <span>📁</span>
             <span className="folder-name">{group.folder}</span>
-            <span className="folder-count">{group.files.length} 个</span>
+            <span className="folder-count">{t('itemsCount', group.files.length)}</span>
           </div>
           <div className="font-grid">
             {group.files.map((font) => {
@@ -192,7 +194,7 @@ export default function FontSection({
                         fontStyle: 'italic'
                       }}
                     >
-                      字体文件 URI 未找到，无法预览
+                      {t('fontUriNotFound')}
                     </div>
                   ) : (
                     <div 
@@ -206,13 +208,13 @@ export default function FontSection({
                     </div>
                   )}
                   <div className="font-size-control">
-                    <span>字号</span>
+                    <span>{t('fontSize')}</span>
                     <input
                       type="range"
                       min="12"
                       max="64"
                       value={fontSize}
-                      aria-label="调整字体预览字号"
+                      aria-label={t('adjustFontSize')}
                       onChange={(e) => setFontSize(fontId, parseInt(e.target.value))}
                     />
                     <span className="font-size-value">{fontSize}px</span>
@@ -229,7 +231,7 @@ export default function FontSection({
                       className="btn secondary" 
                       onClick={() => onReveal(font.path)}
                     >
-                      定位字体文件
+                      {t('locateFont')}
                     </button>
                   </div>
                 </div>

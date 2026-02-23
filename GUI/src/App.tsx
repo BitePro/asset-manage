@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { VsCodeApi, MessageFromExtension, Stats } from "./types";
+import { useI18n } from "./contexts/I18nContext";
 import Header from "./components/Header";
 import SearchBar from "./components/SearchBar";
 import TabBar from "./components/TabBar";
@@ -14,6 +15,7 @@ import PreviewOverlay from "./components/PreviewOverlay";
 const vscode: VsCodeApi = window.acquireVsCodeApi();
 
 export default function App() {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<
     "images" | "media" | "fonts" | "office" | "others"
   >("images");
@@ -268,7 +270,7 @@ export default function App() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="modal-header">
-              <h3>内容重复的图片</h3>
+              <h3>{t('duplicateImages')}</h3>
               <button
                 className="close-btn"
                 onClick={() => setDuplicateModalGroup(null)}
@@ -279,7 +281,7 @@ export default function App() {
             <div className="modal-body structured">
               {/* 当前图片部分 */}
               <div className="modal-section current">
-                <div className="section-header">当前图片</div>
+                <div className="section-header">{t('currentImage')}</div>
                 <div className="current-image-card mini">
                   <div className="current-preview small">
                     <img
@@ -303,9 +305,9 @@ export default function App() {
               </div>
 
               {/* 重复列表部分 */}
-              <div className="modal-section duplicates">
+                <div className="modal-section duplicates">
                 <div className="section-header">
-                  重复的图片 ({duplicateHashes[duplicateModalGroup.hash] - 1})
+                  {t('duplicateList', duplicateHashes[duplicateModalGroup.hash] - 1)}
                 </div>
                 <div className="duplicate-groups">
                   {getDuplicateGroups(
@@ -323,7 +325,7 @@ export default function App() {
                             className="duplicate-item small with-preview"
                           >
                             <div className="dup-mini-preview">
-                              < img src={file.uri} alt={file.name} />
+                              <img src={file.uri} alt={file.name} />
                             </div>
                             <div className="dup-info">
                               <div className="dup-name" title={file.name}>
@@ -337,7 +339,7 @@ export default function App() {
                               className="btn secondary tiny"
                               onClick={() => handleReveal(file.path)}
                             >
-                              定位
+                              {t('locate')}
                             </button>
                           </div>
                         ))}

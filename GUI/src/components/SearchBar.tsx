@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useI18n } from '../contexts/I18nContext';
 
 interface SearchBarProps {
   value: string;
@@ -8,6 +9,7 @@ interface SearchBarProps {
 }
 
 export default function SearchBar({ value, onChange, sortBy, onSortChange }: SearchBarProps) {
+  const { t } = useI18n();
   const [localValue, setLocalValue] = useState(value);
   const [showSortMenu, setShowSortMenu] = useState(false);
   
@@ -67,10 +69,10 @@ export default function SearchBar({ value, onChange, sortBy, onSortChange }: Sea
 
   const getSortLabel = () => {
     switch (sortBy) {
-      case 'name': return '按名字排序';
-      case 'size-asc': return '体积 小-大';
-      case 'size-desc': return '体积 大-小';
-      default: return '排序方式';
+      case 'name': return t('sortByName');
+      case 'size-asc': return t('sortBySizeAsc');
+      case 'size-desc': return t('sortBySizeDesc');
+      default: return t('sortLabel');
     }
   };
 
@@ -91,19 +93,19 @@ export default function SearchBar({ value, onChange, sortBy, onSortChange }: Sea
               className={`sort-item ${sortBy === 'name' ? 'active' : ''}`} 
               onClick={() => { onSortChange('name'); setShowSortMenu(false); }}
             >
-              按名字排序
+              {t('sortByName')}
             </div>
             <div 
               className={`sort-item ${sortBy === 'size-asc' ? 'active' : ''}`} 
               onClick={() => { onSortChange('size-asc'); setShowSortMenu(false); }}
             >
-              体积 小-大
+              {t('sortBySizeAsc')}
             </div>
             <div 
               className={`sort-item ${sortBy === 'size-desc' ? 'active' : ''}`} 
               onClick={() => { onSortChange('size-desc'); setShowSortMenu(false); }}
             >
-              体积 大-小
+              {t('sortBySizeDesc')}
             </div>
           </div>
         )}
@@ -115,7 +117,7 @@ export default function SearchBar({ value, onChange, sortBy, onSortChange }: Sea
           type="text"
           id="searchInput"
           className="search-input"
-          placeholder="搜索文件路径或文件名..."
+          placeholder={t('searchPlaceholder')}
           value={localValue}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
@@ -126,7 +128,7 @@ export default function SearchBar({ value, onChange, sortBy, onSortChange }: Sea
           <button 
             className="clear-btn visible" 
             onClick={handleClear}
-            title="清除搜索"
+            title={t('clearSearch')}
           >
             ✕
           </button>

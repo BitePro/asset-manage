@@ -7,7 +7,9 @@ import { log } from "./utils/logger";
 export async function activate(context: vscode.ExtensionContext) {
   const workspace = vscode.workspace.workspaceFolders?.[0];
   if (!workspace) {
-    vscode.window.showWarningMessage("Asset Manage: 请先打开一个工作区。");
+    vscode.window.showWarningMessage(
+      vscode.l10n.t("Asset Manage: Please open a workspace first.")
+    );
     return;
   }
 
@@ -17,7 +19,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     vscode.commands.registerCommand("assetManage.refreshIndexes", async () => {
-      vscode.window.showInformationMessage("Asset Manage 索引已刷新");
+      vscode.window.showInformationMessage(
+        vscode.l10n.t("Asset Manage index refreshed")
+      );
       await imagesView.refreshData();
     })
   );
@@ -70,7 +74,7 @@ export async function activate(context: vscode.ExtensionContext) {
     )
   );
 
-  log("Asset Manage 已激活");
+  log(vscode.l10n.t("Asset Manage activated"));
 }
 
 function registerStatusBarShortcut(context: vscode.ExtensionContext) {
@@ -79,7 +83,7 @@ function registerStatusBarShortcut(context: vscode.ExtensionContext) {
     100
   );
   item.text = "$(file-media) Asset Manage";
-  item.tooltip = "打开静态资源面板";
+  item.tooltip = vscode.l10n.t("Open static assets panel");
   item.command = "assetManage.showImageGallery";
   item.show();
   context.subscriptions.push(item);

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ImageFile } from "../types";
+import { useI18n } from "../contexts/I18nContext";
 
 interface ImageSectionProps {
   data: Array<{ folder: string; files: ImageFile[] }>;
@@ -34,6 +35,7 @@ export default function ImageSection({
   onReveal,
   onDuplicateClick,
 }: ImageSectionProps) {
+  const { t } = useI18n();
   const [folders, setFolders] = useState<FolderGroup[]>([]);
   const [previewImage, setPreviewImage] = useState<{
     src: string;
@@ -107,8 +109,8 @@ export default function ImageSection({
     return (
       <div className="empty">
         <div style={{ fontSize: "32px", marginBottom: "8px" }}>🖼️</div>
-        <div style={{ fontWeight: 600, marginBottom: "6px" }}>暂无图片资源</div>
-        <div className="muted">支持 PNG/JPG/WEBP/SVG/AVIF/BMP 等格式</div>
+        <div style={{ fontWeight: 600, marginBottom: "6px" }}>{t('noImages')}</div>
+        <div className="muted">{t('imageFormats')}</div>
       </div>
     );
   }
@@ -117,7 +119,7 @@ export default function ImageSection({
     <>
       <div className="config-row">
         <div className="threshold-setting">
-          <span className="setting-label">大文件阈值:</span>
+          <span className="setting-label">{t('largeFileThreshold')}</span>
           <input
             type="number"
             className="threshold-input"
@@ -149,7 +151,7 @@ export default function ImageSection({
             <span className="folder-toggle">▼</span>
             <span>📁</span>
             <span className="folder-name">{group.folder}</span>
-            <span className="folder-count">{group.files.length} 张</span>
+            <span className="folder-count">{t('imagesCount', group.files.length)}</span>
           </div>
           <div className="gallery">
             {group.files.map((file) => {
@@ -169,21 +171,21 @@ export default function ImageSection({
                     {isLarge && (
                       <div
                         className="badge warning"
-                        title={`文件过大 (阈值: ${thresholdValue}${thresholdUnit})`}
+                        title={t('fileTooLarge', thresholdValue, thresholdUnit)}
                       >
-                        Big
+                        {t('bigFile')}
                       </div>
                     )}
                     {isDuplicate && (
                       <div
                         className="badge chongfu"
-                        title={`发现 ${duplicateCount} 个重复项`}
+                        title={t('duplicateCount', duplicateCount)}
                         onClick={(e) => {
                           e.stopPropagation();
                           onDuplicateClick(file);
                         }}
                       >
-                        重复
+                        {t('duplicate')}
                       </div>
                     )}
                   </div>
@@ -216,13 +218,13 @@ export default function ImageSection({
                         <div
                           className="chongfu-action"
                           style={{ marginTop: "3px" }}
-                          title={`发现 ${duplicateCount} 个重复项`}
+                          title={t('duplicateCount', duplicateCount)}
                           onClick={(e) => {
                             e.stopPropagation();
                             onDuplicateClick(file);
                           }}
                         >
-                          查看重复
+                          {t('viewDuplicates')}
                         </div>
                       )}
                     </div>
@@ -253,11 +255,19 @@ export default function ImageSection({
             {previewImage.name} · {previewImage.size}
           </div>
           <div className="preview-header">
+            <div className="preview-close">
+              <button className="btn" onClick={closePreview}>
+                {t('close')}
+              </button>
+            </div>
+          </div>
+          
+          <div className="preview-footer">
             <div
               className="preview-bg-control"
               onClick={(e) => e.stopPropagation()}
             >
-              <span className="control-label">背景：</span>
+              <span className="control-label">{t('background')}</span>
               <span className="control-icon">🌑</span>
               <input
                 type="range"
@@ -269,11 +279,7 @@ export default function ImageSection({
               />
               <span className="control-icon">🌕</span>
             </div>
-            <div className="preview-close">
-              <button className="btn secondary" onClick={closePreview}>
-                关闭
-              </button>
-            </div>
+            
           </div>
         </div>
       )}

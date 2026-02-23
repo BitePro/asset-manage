@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { MediaFile } from '../types';
+import { useI18n } from '../contexts/I18nContext';
 
 interface MediaSectionProps {
   data: Array<{ folder: string; files: MediaFile[] }>;
@@ -19,6 +20,7 @@ export default function MediaSection({
   searchQuery, 
   onReveal, 
 }: MediaSectionProps) {
+  const { t } = useI18n();
   const [folders, setFolders] = useState<FolderGroup[]>([]);
 
   // 将接收到的数据转换为组件内部状态
@@ -55,8 +57,8 @@ export default function MediaSection({
     return (
       <div className="empty">
         <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎵</div>
-        <div style={{ fontWeight: 600, marginBottom: '6px' }}>暂无音视频</div>
-        <div className="muted">支持 MP3/WAV/FLAC/OGG/AAC、MP4/MOV/MKV/WEBM/AVI 等格式</div>
+        <div style={{ fontWeight: 600, marginBottom: '6px' }}>{t('noMedia')}</div>
+        <div className="muted">{t('mediaFormats')}</div>
       </div>
     );
   }
@@ -69,7 +71,7 @@ export default function MediaSection({
             <span className="folder-toggle">▼</span>
             <span>📁</span>
             <span className="folder-name">{group.folder}</span>
-            <span className="folder-count">{group.files.length} 个</span>
+            <span className="folder-count">{t('itemsCount', group.files.length)}</span>
           </div>
           <div className="media-grid">
             {group.files.map(file => (
@@ -94,7 +96,7 @@ export default function MediaSection({
                 <div className="media-meta">📦 {file.size}</div>
                 <div className="card-actions">
                   <button className="btn secondary" onClick={() => onReveal(file.path)}>
-                    资源定位
+                    {t('locateResource')}
                   </button>
                 </div>
               </div>

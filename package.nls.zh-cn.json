@@ -1,0 +1,16 @@
+{
+  "extension.title": "Asset Manage",
+  "extension.description": "静态资源侧边栏与预览。",
+  "extension.viewTitle": "静态资源",
+  "extension.configTitle": "Asset Manage 配置",
+  "extension.scanIncludeDesc": "参与资源扫描的 glob 列表。",
+  "extension.scanExcludeDesc": "资源扫描排除的 glob 列表。",
+  "extension.refreshCommand": "Asset Manage",
+  "extension.previewFontCommand": "字体预览",
+  "extension.showGalleryCommand": "Asset Manage: 查看静态资源",
+  "extension.openSidebarCommand": "Asset Manage: 打开静态资源（侧边栏）",
+  "extension.openPanelTooltip": "打开静态资源面板",
+  "extension.workspaceRequired": "Asset Manage: 请先打开一个工作区。",
+  "extension.indexRefreshed": "Asset Manage 索引已刷新",
+  "extension.activated": "Asset Manage 已激活"
+}

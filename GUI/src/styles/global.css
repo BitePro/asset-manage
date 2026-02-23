@@ -61,6 +61,56 @@
     gap: 8px;
     align-items: center;
   }
+
+  .lang-selector {
+    position: relative;
+  }
+
+  .lang-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    background: var(--vscode-button-secondaryBackground);
+    color: var(--vscode-button-secondaryForeground);
+    border: 1px solid var(--vscode-button-border);
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .lang-btn:hover {
+    background: var(--vscode-button-secondaryHoverBackground);
+  }
+
+  .lang-btn.active {
+    border-color: var(--vscode-focusBorder);
+  }
+
+  .lang-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 4px;
+    min-width: 100px;
+    background: var(--vscode-dropdown-background);
+    border: 1px solid var(--vscode-dropdown-border);
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 200;
+  }
+
+  .lang-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  .lang-item:hover {
+    background: var(--vscode-list-hoverBackground);
+  }
+
+  .lang-item.active {
+    background: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+  }
   
   /* Search */
   .search-container {
@@ -99,6 +149,10 @@
     font-size: 13px;
     outline: none;
     min-width: 0;
+  }
+  .search-input:focus {
+    border: none;
+    outline: none;
   }
   
   .search-input::placeholder {
@@ -572,6 +626,16 @@
   top: 20px;
   left: 0;
   right: 0;
+  width: 100%;
+  display: flex;
+  
+  justify-content: flex-end;
+}
+.preview-footer {
+  position: fixed;
+  bottom: 20px;
+  left: 0;
+  right: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -594,6 +658,7 @@
 
 .preview-close {
   margin-right: 18px;
+ 
 }
 
 .preview-bg-control .control-label {

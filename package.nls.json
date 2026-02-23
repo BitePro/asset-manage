@@ -1,0 +1,16 @@
+{
+  "extension.title": "Asset Manage",
+  "extension.description": "Sidebar and preview for images, fonts, media and documents.",
+  "extension.viewTitle": "Static Assets",
+  "extension.configTitle": "Asset Manage Configuration",
+  "extension.scanIncludeDesc": "Glob patterns for files to include in asset scanning.",
+  "extension.scanExcludeDesc": "Glob patterns for files to exclude from asset scanning.",
+  "extension.refreshCommand": "Asset Manage",
+  "extension.previewFontCommand": "Font Preview",
+  "extension.showGalleryCommand": "Asset Manage: View Static Assets",
+  "extension.openSidebarCommand": "Asset Manage: Open Static Assets (Sidebar)",
+  "extension.openPanelTooltip": "Open static assets panel",
+  "extension.workspaceRequired": "Asset Manage: Please open a workspace first.",
+  "extension.indexRefreshed": "Asset Manage index refreshed",
+  "extension.activated": "Asset Manage activated"
+}

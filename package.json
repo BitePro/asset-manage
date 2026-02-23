@@ -1,7 +1,7 @@
 {
   "name": "asset-manage",
   "displayName": "Asset Manage",
-  "description": "静态资源侧边栏与预览。Sidebar and preview for images, fonts, media and documents.",
+  "description": "%extension.description%",
   "version": "0.1.1",
   "publisher": "zqt",
   "icon": "icon.png",
@@ -37,12 +37,13 @@
   ],
   "activationEvents": [],
   "main": "./out/extension.js",
+  "l10n": "./l10n",
   "contributes": {
     "viewsContainers": {
       "activitybar": [
         {
           "id": "assetmanage",
-          "title": "Asset Manage",
+          "title": "%extension.title%",
           "icon": "resources/assetmanage-icon-dark.svg"
         }
       ]
@@ -50,20 +51,20 @@
     "commands": [
       {
         "command": "assetManage.refreshIndexes",
-        "title": "Asset Manage"
+        "title": "%extension.refreshCommand%"
       },
       {
         "command": "assetManage.previewFontInSidebar",
-        "title": "字体预览"
+        "title": "%extension.previewFontCommand%"
       },
       {
         "command": "assetManage.showImageGallery",
-        "title": "Asset Manage: 查看静态资源",
+        "title": "%extension.showGalleryCommand%",
         "icon": "$(file-media)"
       },
       {
         "command": "assetManage.openImagesSidebar",
-        "title": "Asset Manage: 打开静态资源（侧边栏）"
+        "title": "%extension.openSidebarCommand%"
       }
     ],
     "keybindings": [
@@ -79,7 +80,7 @@
         {
           "id": "assetManage.imagesView",
           "type": "webview",
-          "name": "静态资源"
+          "name": "%extension.viewTitle%"
         }
       ]
     },
@@ -101,14 +102,14 @@
     },
     "configuration": {
       "type": "object",
-      "title": "Asset Manage 配置",
+      "title": "%extension.configTitle%",
       "properties": {
         "assetManage.scanInclude": {
           "type": "array",
           "default": [
             "**/*"
           ],
-          "description": "参与资源扫描的 glob 列表。"
+          "description": "%extension.scanIncludeDesc%"
         },
         "assetManage.scanExclude": {
           "type": "array",
@@ -118,7 +119,7 @@
             "**/dist/**",
             "**/build/**"
           ],
-          "description": "资源扫描排除的 glob 列表。"
+          "description": "%extension.scanExcludeDesc%"
         }
       }
     }

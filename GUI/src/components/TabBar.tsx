@@ -1,4 +1,6 @@
 import { Stats } from '../types';
+import { useI18n } from '../contexts/I18nContext';
+
 interface TabBarProps {
   activeTab: 'images' | 'media' | 'fonts' | 'office' | 'others';
   onTabChange: (tab: 'images' | 'media' | 'fonts' | 'office' | 'others') => void;
@@ -6,12 +8,13 @@ interface TabBarProps {
 }
 
 export default function TabBar({ activeTab, onTabChange, stats }: TabBarProps) {
+  const { t } = useI18n();
   const tabs = [
-    { id: 'images' as const, label: '图片' },
-    { id: 'media' as const, label: '音视频' },
-    { id: 'fonts' as const, label: '字体' },
-    { id: 'office' as const, label: '办公' },
-    { id: 'others' as const, label: '其他' },
+    { id: 'images' as const, labelKey: 'tabImages' as const },
+    { id: 'media' as const, labelKey: 'tabMedia' as const },
+    { id: 'fonts' as const, labelKey: 'tabFonts' as const },
+    { id: 'office' as const, labelKey: 'tabOffice' as const },
+    { id: 'others' as const, labelKey: 'tabOthers' as const },
   ];
 
   return (
@@ -22,7 +25,7 @@ export default function TabBar({ activeTab, onTabChange, stats }: TabBarProps) {
           className={`tab ${activeTab === tab.id ? 'active' : ''}`}
           onClick={() => onTabChange(tab.id)}
         >
-          {tab.label} {stats?.[tab.id as keyof Stats] || 0}
+          {t(tab.labelKey)} {stats?.[tab.id as keyof Stats] || 0}
         </button>
       ))}
     </div>

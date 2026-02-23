@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { OfficeFile } from '../types';
 import DocumentPreview from './DocumentPreview';
+import { useI18n } from '../contexts/I18nContext';
 
 interface OfficeSectionProps {
   data: Array<{ folder: string; files: OfficeFile[] }>;
@@ -21,6 +22,7 @@ export default function OfficeSection({
   onReveal, 
   onOpenFile
 }: OfficeSectionProps) {
+  const { t } = useI18n();
   const [folders, setFolders] = useState<FolderGroup[]>([]);
   const [previewFile, setPreviewFile] = useState<OfficeFile | null>(null);
 
@@ -56,11 +58,11 @@ export default function OfficeSection({
 
   const getFileTypeName = (fileType: OfficeFile['fileType']) => {
     switch (fileType) {
-      case 'word': return 'Word 文档';
-      case 'excel': return 'Excel 表格';
-      case 'powerpoint': return 'PowerPoint 演示文稿';
-      case 'pdf': return 'PDF 文档';
-      default: return '文档';
+      case 'word': return t('wordDoc');
+      case 'excel': return t('excelSheet');
+      case 'powerpoint': return t('ppt');
+      case 'pdf': return t('pdfDoc');
+      default: return t('document');
     }
   };
 
@@ -92,8 +94,8 @@ export default function OfficeSection({
     return (
       <div className="empty">
         <div style={{ fontSize: '32px', marginBottom: '8px' }}>📂</div>
-        <div style={{ fontWeight: 600, marginBottom: '6px' }}>暂无办公文档</div>
-        <div className="muted">支持 Word、Excel、PowerPoint、PDF 等格式</div>
+        <div style={{ fontWeight: 600, marginBottom: '6px' }}>{t('noOffice')}</div>
+        <div className="muted">{t('officeFormats')}</div>
       </div>
     );
   }
@@ -106,7 +108,7 @@ export default function OfficeSection({
             <span className="folder-toggle">▼</span>
             <span>📁</span>
             <span className="folder-name">{group.folder}</span>
-            <span className="folder-count">{group.files.length} 个</span>
+            <span className="folder-count">{t('itemsCount', group.files.length)}</span>
           </div>
           <div className="office-grid">
             {group.files.map(file => (
@@ -129,7 +131,7 @@ export default function OfficeSection({
                       className="btn secondary" 
                       onClick={() => handlePreview(file)}
                     >
-                      预览
+                      {t('preview')}
                     </button>
                   )}
                   {/* <button 
@@ -142,7 +144,7 @@ export default function OfficeSection({
                     className="btn secondary" 
                     onClick={() => onReveal(file.path)}
                   >
-                    资源定位
+                    {t('locateResource')}
                   </button>
                 </div>
               </div>
