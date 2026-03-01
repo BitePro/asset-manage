@@ -2,7 +2,7 @@
   "name": "asset-manage",
   "displayName": "Asset Manager",
   "description": "Asset Manager is a tool for managing assets in your workspace.",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "publisher": "zqt",
   "icon": "icon.png",
   "galleryBanner": {
