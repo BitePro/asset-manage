@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FontFile } from '../types';
 import { useI18n } from '../contexts/I18nContext';
+import { handleAssetDragStart } from '../utils/dragUtils';
 
 interface FontSectionProps {
   data: Array<{ folder: string; files: FontFile[] }>;
@@ -175,9 +176,12 @@ export default function FontSection({
               return (
                 <div 
                   key={font.path} 
-                  className="font-card"
+                  className="font-card draggable-asset"
                   data-file-path={font.path}
                   data-file-name={font.name.toLowerCase()}
+                  draggable
+                  onDragStart={(e) => handleAssetDragStart(e, font.relativePath || font.path)}
+                  title={t('dragToInsert')}
                 >
                   <div className="font-title">
                     <span>🔤</span>

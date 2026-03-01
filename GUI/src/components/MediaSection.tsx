@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { MediaFile } from '../types';
 import { useI18n } from '../contexts/I18nContext';
+import { handleAssetDragStart } from '../utils/dragUtils';
 
 interface MediaSectionProps {
   data: Array<{ folder: string; files: MediaFile[] }>;
@@ -77,9 +78,12 @@ export default function MediaSection({
             {group.files.map(file => (
               <div 
                 key={file.path} 
-                className="media-card"
+                className="media-card draggable-asset"
                 data-file-path={file.path}
                 data-file-name={file.name.toLowerCase()}
+                draggable
+                onDragStart={(e) => handleAssetDragStart(e, file.relativePath || file.path)}
+                title={t('dragToInsert')}
               >
                 <div className="media-title">
                   <span>{file.kind === 'video' ? '🎬' : '🎧'}</span>
@@ -88,9 +92,9 @@ export default function MediaSection({
                 </div>
                 <div className="media-preview">
                   {file.kind === 'video' ? (
-                    <video src={file.uri} controls preload="metadata" style={{ maxHeight: '160px' }} />
+                    <video src={file.uri} controls preload="metadata" style={{ maxHeight: '160px' }} draggable={false} />
                   ) : (
-                    <audio src={file.uri} controls preload="metadata" />
+                    <audio src={file.uri} controls preload="metadata" draggable={false} />
                   )}
                 </div>
                 <div className="media-meta">📦 {file.size}</div>

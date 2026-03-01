@@ -20,6 +20,9 @@ export const en = {
   searchPlaceholder: 'Search by filename or path...',
   clearSearch: 'Clear search',
 
+  // Drag (shared)
+  dragToInsert: 'Drag to editor to insert relative path',
+
   // ImageSection
   noImages: 'No images found',
   imageFormats: 'Supports PNG/JPG/WEBP/SVG/AVIF/BMP etc.',

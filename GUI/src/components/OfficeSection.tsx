@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { OfficeFile } from '../types';
 import DocumentPreview from './DocumentPreview';
 import { useI18n } from '../contexts/I18nContext';
+import { handleAssetDragStart } from '../utils/dragUtils';
 
 interface OfficeSectionProps {
   data: Array<{ folder: string; files: OfficeFile[] }>;
@@ -114,9 +115,12 @@ export default function OfficeSection({
             {group.files.map(file => (
               <div 
                 key={file.path} 
-                className="office-card"
+                className="office-card draggable-asset"
                 data-file-path={file.path}
                 data-file-name={file.name.toLowerCase()}
+                draggable
+                onDragStart={(e) => handleAssetDragStart(e, file.relativePath || file.path)}
+                title={t('dragToInsert')}
               >
                 <div className="office-title">
                   <span>{getFileIcon(file.fileType)}</span>

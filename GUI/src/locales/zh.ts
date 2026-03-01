@@ -20,6 +20,9 @@ export const zh = {
   searchPlaceholder: '搜索文件路径或文件名...',
   clearSearch: '清除搜索',
 
+  // Drag (shared)
+  dragToInsert: '拖拽到编辑器可插入相对路径',
+
   // ImageSection
   noImages: '暂无图片资源',
   imageFormats: '支持 PNG/JPG/WEBP/SVG/AVIF/BMP 等格式',

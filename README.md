@@ -12,7 +12,8 @@
 
 ## 演示视频 / Demo
 
-![使用演示](resources/guide.gif)
+![使用演示](https://github.com/BitePro/asset-manage/raw/HEAD/guide/guide.gif)
+
 
 ---
 

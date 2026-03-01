@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ImageFile } from "../types";
 import { useI18n } from "../contexts/I18nContext";
+import { handleAssetDragStart } from "../utils/dragUtils";
 
 interface ImageSectionProps {
   data: Array<{ folder: string; files: ImageFile[] }>;
@@ -164,8 +165,11 @@ export default function ImageSection({
               return (
                 <div
                   key={file.path}
-                  className={`card ${isLarge ? "warning" : ""} ${isDuplicate ? "duplicate" : ""}`}
+                  className={`card ${isLarge ? "warning" : ""} ${isDuplicate ? "duplicate" : ""} draggable-asset`}
                   data-file-path={file.path}
+                  draggable
+                  onDragStart={(e) => handleAssetDragStart(e, file.relativePath || file.path)}
+                  title={t("dragToInsert")}
                 >
                   <div className="card-tags">
                     {isLarge && (
@@ -194,7 +198,7 @@ export default function ImageSection({
                     className="img-container"
                     onClick={() => showPreview(file.uri, file.name, file.size)}
                   >
-                    < img src={file.uri} alt={file.name} loading="lazy" />
+                    <img src={file.uri} alt={file.name} loading="lazy" />
                   </div>
                   <div className="card-info">
                     <div

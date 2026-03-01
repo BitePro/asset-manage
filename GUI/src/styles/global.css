@@ -1413,3 +1413,11 @@
   .chongfu-action {
     color: rgb(29, 110, 197);
 }
+
+/* 可拖拽资源 - 拖拽到编辑器插入相对路径 */
+.draggable-asset {
+  cursor: grab;
+}
+.draggable-asset:active {
+  cursor: grabbing;
+}

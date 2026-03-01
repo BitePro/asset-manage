@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { AssetFile } from '../types';
 import { useI18n } from '../contexts/I18nContext';
+import { handleAssetDragStart } from '../utils/dragUtils';
 
 interface OtherSectionProps {
   data: Array<{ folder: string; files: AssetFile[] }>;
@@ -77,9 +78,12 @@ export default function OtherSection({
             {group.files.map(file => (
               <div 
                 key={file.path} 
-                className="other-card"
+                className="other-card draggable-asset"
                 data-file-path={file.path}
                 data-file-name={file.name.toLowerCase()}
+                draggable
+                onDragStart={(e) => handleAssetDragStart(e, file.relativePath || file.path)}
+                title={t('dragToInsert')}
               >
                 <div className="other-title">
                   <span>📄</span>
