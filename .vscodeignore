@@ -6,6 +6,9 @@ tsconfig.json
 .mocharc.json
 .npmrc
 
+# 演示内容
+guide/**
+
 # GUI 源码与构建配置（仅打包 GUI/dist）
 GUI/src/**
 GUI/package.json
