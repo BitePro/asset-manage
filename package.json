@@ -1,8 +1,8 @@
 {
   "name": "asset-manage",
-  "displayName": "Asset Manage",
-  "description": "%extension.description%",
-  "version": "0.2.1",
+  "displayName": "Asset Manager",
+  "description": "Asset Manager is a tool for managing assets in your workspace.",
+  "version": "0.2.2",
   "publisher": "zqt",
   "icon": "icon.png",
   "galleryBanner": {
@@ -17,6 +17,12 @@
   ],
   "keywords": [
     "asset",
+    "Manage",
+    "Manager",
+    "assetManage",
+    "asset-manage",
+    "assetManager",
+    "asset-manager",
     "image",
     "font",
     "preview",
@@ -135,19 +141,11 @@
   },
   "dependencies": {
     "fast-glob": "^3.3.2",
-    "fontkit": "^2.0.2",
-    "xlsx": "^0.18.5"
+    "fontkit": "^2.0.2"
   },
   "devDependencies": {
-    "@types/chai": "^5.2.3",
-    "@types/mocha": "^10.0.10",
     "@types/node": "^20.11.19",
-    "@types/sinon": "^21.0.0",
     "@types/vscode": "^1.90.0",
-    "@vscode/test-electron": "^2.5.2",
-    "chai": "^6.2.2",
-    "mocha": "^11.7.5",
-    "sinon": "^21.0.1",
     "typescript": "^5.3.3"
   },
   "license": "MIT",
