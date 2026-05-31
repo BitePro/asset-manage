@@ -2,7 +2,7 @@
   "name": "asset-manage",
   "displayName": "Asset Manager",
   "description": "Asset Manager is a tool for managing assets in your workspace.",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "publisher": "zqt",
   "icon": "icon.png",
   "galleryBanner": {
@@ -71,6 +71,15 @@
       {
         "command": "assetManage.openImagesSidebar",
         "title": "%extension.openSidebarCommand%"
+      },
+      {
+        "command": "assetManage.semanticSearch",
+        "title": "%extension.semanticSearchCommand%",
+        "icon": "$(search-fuzzy)"
+      },
+      {
+        "command": "assetManage.buildImageIndex",
+        "title": "%extension.buildImageIndexCommand%"
       }
     ],
     "keybindings": [
@@ -126,6 +135,55 @@
             "**/build/**"
           ],
           "description": "%extension.scanExcludeDesc%"
+        },
+        "assetManage.semanticSearch.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "%extension.ss.enableDesc%"
+        },
+        "assetManage.semanticSearch.ocrEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "%extension.ss.ocrEnabledDesc%"
+        },
+        "assetManage.semanticSearch.ocrWeight": {
+          "type": "number",
+          "default": 0.3,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "%extension.ss.ocrWeightDesc%"
+        },
+        "assetManage.semanticSearch.topN": {
+          "type": "number",
+          "default": 20,
+          "minimum": 1,
+          "description": "%extension.ss.topNDesc%"
+        },
+        "assetManage.semanticSearch.minScore": {
+          "type": "number",
+          "default": 0.1,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "%extension.ss.minScoreDesc%"
+        },
+        "assetManage.semanticSearch.concurrency": {
+          "type": "number",
+          "default": 2,
+          "minimum": 1,
+          "description": "%extension.ss.concurrencyDesc%"
+        },
+        "assetManage.semanticSearch.modelCachePath": {
+          "type": "string",
+          "default": "",
+          "description": "%extension.ss.modelCachePathDesc%"
+        },
+        "assetManage.semanticSearch.mirrors": {
+          "type": "array",
+          "default": [
+            "huggingface.co",
+            "hf-mirror.com"
+          ],
+          "description": "%extension.ss.mirrorsDesc%"
         }
       }
     }
@@ -140,12 +198,15 @@
     "vscode:prepublish": "npm run prebuild && npm run compile"
   },
   "dependencies": {
+    "@huggingface/transformers": "^3.0.0",
     "fast-glob": "^3.3.2",
-    "fontkit": "^2.0.2"
+    "fontkit": "^2.0.2",
+    "sharp": "^0.33.0",
+    "tesseract.js": "^5.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.19",
-    "@types/vscode": "^1.90.0",
+    "@types/vscode": "^1.74.0",
     "typescript": "^5.3.3"
   },
   "license": "MIT",

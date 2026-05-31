@@ -2,5 +2,8 @@
   "Asset Manage: Please open a workspace first.": "Asset Manage: Please open a workspace first.",
   "Asset Manage index refreshed": "Asset Manage index refreshed",
   "Asset Manage activated": "Asset Manage activated",
-  "Open static assets panel": "Open static assets panel"
+  "Open static assets panel": "Open static assets panel",
+  "Asset Manage: Search Images by Description": "Asset Manage: Search Images by Description",
+  "Asset Manage: downloading search models": "Asset Manage: downloading search models",
+  "Asset Manage: building image index": "Asset Manage: building image index"
 }

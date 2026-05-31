@@ -20,6 +20,13 @@ export default function App() {
     "images" | "media" | "fonts" | "office" | "others"
   >("images");
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchMode, setSearchMode] = useState<"filename" | "semantic">(
+    "filename",
+  );
+  const [semanticResults, setSemanticResults] = useState<any[]>([]);
+  const [semanticBusy, setSemanticBusy] = useState(false);
+  const [semanticStatus, setSemanticStatus] = useState("");
+  const [semanticError, setSemanticError] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [assetData, setAssetData] = useState<any>(null);
   const [stats, setStats] = useState<Stats>({
@@ -72,6 +79,40 @@ export default function App() {
         setTimeout(() => {
           setSearchQuery(message.fileName);
         }, 100);
+      } else if (message.type === "enterSemanticSearch") {
+        setActiveTab("images");
+        setSearchMode("semantic");
+      } else if (message.type === "searchStart") {
+        setActiveTab("images");
+        setSearchMode("semantic");
+        setSemanticBusy(true);
+        setSemanticError("");
+        setSemanticStatus(t("semanticPreparing"));
+      } else if (message.type === "modelDownloadProgress") {
+        setSemanticBusy(true);
+        setSemanticStatus(t("modelDownloadProgress", message.file, message.percent));
+      } else if (message.type === "indexProgress") {
+        setSemanticBusy(true);
+        setSemanticStatus(t("indexProgress", message.processed, message.total));
+      } else if (message.type === "indexBuilt") {
+        setSemanticBusy(false);
+        setSemanticError("");
+        setSemanticStatus(t("indexBuilt", message.count));
+      } else if (message.type === "searchResults") {
+        setActiveTab("images");
+        setSearchMode("semantic");
+        setSemanticBusy(false);
+        setSemanticStatus("");
+        setSemanticError("");
+        setSemanticResults(message.results || []);
+      } else if (message.type === "searchError") {
+        setSemanticBusy(false);
+        setSemanticStatus("");
+        setSemanticError(message.message || t("semanticSearchFailed"));
+      } else if (message.type === "searchCancelled") {
+        setSemanticBusy(false);
+        setSemanticStatus("");
+        setSemanticError("");
       } else if (message.type === "assetData") {
         // 接收资源数据
         const data = message.data;
@@ -135,7 +176,7 @@ export default function App() {
 
     window.addEventListener("message", handleMessage);
     return () => window.removeEventListener("message", handleMessage);
-  }, []);
+  }, [t]);
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
@@ -153,6 +194,51 @@ export default function App() {
   const handleTabChange = useCallback((tab: typeof activeTab) => {
     setActiveTab(tab);
     setSearchQuery(""); // 切换标签时清空搜索
+    if (tab !== "images") {
+      setSearchMode("filename");
+      setSemanticResults([]);
+      setSemanticError("");
+      setSemanticStatus("");
+    }
+  }, []);
+
+  const handleSearchModeChange = useCallback((mode: "filename" | "semantic") => {
+    setSearchMode(mode);
+    setSearchQuery("");
+    setSemanticError("");
+    setSemanticStatus("");
+    if (mode === "filename") {
+      setSemanticResults([]);
+    } else {
+      setActiveTab("images");
+    }
+  }, []);
+
+  const handleSemanticSearch = useCallback((query: string) => {
+    const trimmed = query.trim();
+    if (!trimmed || semanticBusy) return;
+    setSearchQuery(trimmed);
+    setSemanticResults([]);
+    setSemanticError("");
+    setSemanticStatus(t("semanticPreparing"));
+    setSemanticBusy(true);
+    vscode.postMessage({ type: "semanticSearch", query: trimmed });
+  }, [semanticBusy, t]);
+
+  const handleBuildIndex = useCallback(() => {
+    if (semanticBusy) return;
+    setSearchMode("semantic");
+    setActiveTab("images");
+    setSemanticError("");
+    setSemanticStatus(t("semanticPreparing"));
+    setSemanticBusy(true);
+    vscode.postMessage({ type: "buildIndex" });
+  }, [semanticBusy, t]);
+
+  const handleCancelSemanticSearch = useCallback(() => {
+    vscode.postMessage({ type: "cancelSearch" });
+    setSemanticBusy(false);
+    setSemanticStatus("");
   }, []);
 
   const handleDuplicateClick = (file: any) => {
@@ -192,17 +278,23 @@ export default function App() {
         onRefresh={handleRefresh}
       />
 
-      <SearchBar
-        value={searchQuery}
-        onChange={setSearchQuery}
-        sortBy={sortBy as any}
-        onSortChange={setSortBy as any}
-      />
-
       <TabBar
         stats={stats}
         activeTab={activeTab}
         onTabChange={handleTabChange}
+      />
+
+      <SearchBar
+        value={searchQuery}
+        onChange={setSearchQuery}
+        mode={searchMode}
+        onModeChange={handleSearchModeChange}
+        onSemanticSearch={handleSemanticSearch}
+        onBuildIndex={handleBuildIndex}
+        isSemanticBusy={semanticBusy}
+        showSemanticControls={activeTab === "images"}
+        sortBy={sortBy as any}
+        onSortChange={setSortBy as any}
       />
 
       <div className="panels">
@@ -210,6 +302,12 @@ export default function App() {
           <ImageSection
             data={assetData?.images || []}
             searchQuery={searchQuery}
+            semanticMode={searchMode === "semantic"}
+            semanticResults={semanticResults}
+            semanticBusy={semanticBusy}
+            semanticStatus={semanticStatus}
+            semanticError={semanticError}
+            onCancelSemanticSearch={handleCancelSemanticSearch}
             sortBy={sortBy as any}
             duplicateHashes={duplicateHashes}
             largeFileThreshold={largeFileThreshold}

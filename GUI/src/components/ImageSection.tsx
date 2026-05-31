@@ -6,6 +6,12 @@ import { handleAssetDragStart } from "../utils/dragUtils";
 interface ImageSectionProps {
   data: Array<{ folder: string; files: ImageFile[] }>;
   searchQuery: string;
+  semanticMode: boolean;
+  semanticResults: ImageFile[];
+  semanticBusy: boolean;
+  semanticStatus: string;
+  semanticError: string;
+  onCancelSemanticSearch: () => void;
   sortBy: "name" | "size-asc" | "size-desc";
   duplicateHashes: Record<string, number>;
   largeFileThreshold: number;
@@ -26,6 +32,12 @@ interface FolderGroup {
 export default function ImageSection({
   data,
   searchQuery,
+  semanticMode,
+  semanticResults,
+  semanticBusy,
+  semanticStatus,
+  semanticError,
+  onCancelSemanticSearch,
   sortBy,
   duplicateHashes,
   largeFileThreshold,
@@ -89,22 +101,36 @@ export default function ImageSection({
     });
   };
 
-  // 过滤逻辑
-  let filteredFolders = folders
-    .map((group) => {
-      let files = group.files.filter(
-        (file) =>
-          !searchQuery ||
-          file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          file.relativePath?.toLowerCase().includes(searchQuery.toLowerCase()),
-      );
+  const formatScore = (score?: number) => {
+    if (typeof score !== "number" || Number.isNaN(score)) return "";
+    return `${Math.round(score * 100)}%`;
+  };
 
-      return {
-        ...group,
-        files: sortFiles(files),
-      };
-    })
-    .filter((group) => group.files.length > 0);
+  const hasSemanticQuery = semanticMode && searchQuery.trim().length > 0;
+
+  const filteredFolders = hasSemanticQuery
+    ? [
+        {
+          folder: t("semanticResults"),
+          files: semanticResults,
+          collapsed: false,
+        },
+      ].filter((group) => group.files.length > 0)
+    : folders
+        .map((group) => {
+          const files = group.files.filter(
+            (file) =>
+              !searchQuery ||
+              file.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              file.relativePath?.toLowerCase().includes(searchQuery.toLowerCase()),
+          );
+
+          return {
+            ...group,
+            files: sortFiles(files),
+          };
+        })
+        .filter((group) => group.files.length > 0);
 
   if (folders.length === 0) {
     return (
@@ -139,6 +165,37 @@ export default function ImageSection({
           </select>
         </div>
       </div>
+
+      {semanticMode && (
+        <div className="semantic-panel">
+          <div>
+            <div className="semantic-title">{t("semanticSearchMode")}</div>
+            <div className="semantic-subtitle">
+              {semanticBusy
+                ? semanticStatus || t("semanticPreparing")
+                : semanticError || (hasSemanticQuery
+                    ? t("semanticResultCount", semanticResults.length)
+                    : t("semanticIdle"))}
+            </div>
+          </div>
+          {semanticBusy && (
+            <button className="btn secondary small" onClick={onCancelSemanticSearch}>
+              {t("cancelSearch")}
+            </button>
+          )}
+        </div>
+      )}
+
+      {semanticMode && !semanticBusy && semanticError && (
+        <div className="semantic-error">{semanticError}</div>
+      )}
+
+      {hasSemanticQuery && !semanticBusy && !semanticError && semanticResults.length === 0 && (
+        <div className="empty semantic-empty">
+          <div style={{ fontWeight: 600, marginBottom: "6px" }}>{t("noSemanticResults")}</div>
+          <div className="muted">{t("tryAnotherDescription")}</div>
+        </div>
+      )}
 
       {filteredFolders.map((group) => (
         <div
@@ -190,6 +247,14 @@ export default function ImageSection({
                         }}
                       >
                         {t('duplicate')}
+                      </div>
+                    )}
+                    {hasSemanticQuery && typeof file.score === "number" && (
+                      <div
+                        className="badge semantic-score"
+                        title={t("semanticScoreDetail", formatScore(file.clipScore), formatScore(file.ocrScore))}
+                      >
+                        {formatScore(file.score)}
                       </div>
                     )}
                   </div>

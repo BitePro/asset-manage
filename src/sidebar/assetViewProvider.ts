@@ -2,7 +2,8 @@ import * as vscode from "vscode";
 import * as path from "path";
 import fg from "fast-glob";
 import { toHumanSize, statSafe } from "../utils/fsUtils";
-import { log } from "../utils/logger";
+import { log, error } from "../utils/logger";
+import { SearchController } from "../services/semanticSearch/searchController";
 import {
   detectResourceType,
   IMAGE_EXT,
@@ -23,6 +24,7 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
   constructor(
     private readonly viewId: "fonts" | "images",
     private readonly extensionUri: vscode.Uri,
+    private readonly searchController?: SearchController,
   ) {
     log(`🏗️ AssetViewProvider 构造函数被调用，viewId: ${viewId}`);
   }
@@ -68,6 +70,14 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
         vscode.workspace
           .openTextDocument(vscode.Uri.file(msg.path))
           .then((doc) => vscode.window.showTextDocument(doc));
+      } else if (command === "semanticSearch") {
+        await this.handleSemanticSearch(String(msg.query ?? ""));
+      } else if (command === "buildIndex") {
+        await this.handleBuildIndex();
+      } else if (command === "cancelSearch") {
+        log("🟡 收到取消语义搜索请求");
+        await this.searchController?.cancelActive();
+        webviewView.webview.postMessage({ type: "searchCancelled" });
       }
     });
 
@@ -82,6 +92,99 @@ export class AssetViewProvider implements vscode.WebviewViewProvider {
   async refreshData() {
     log(`外部触发刷新 ${this.viewId} 视图`);
     await this.sendDataToWebview();
+  }
+
+  /** 聚焦视图并通知前端进入语义搜索模式（命令入口用）。 */
+  public focusSemanticSearch() {
+    this.webviewView?.webview.postMessage({ type: "enterSemanticSearch" });
+  }
+
+  /** 公共入口：由命令触发一次语义搜索（结果回传给 webview）。 */
+  public runSemanticSearch(query: string) {
+    return this.handleSemanticSearch(query);
+  }
+
+  /**
+   * 处理语义搜索请求：确保模型/索引就绪 → 查询 → 回传排序结果。
+   * 失败时发送 searchError，确保插件不崩溃（任务 6.2 / 6.4 / 30）。
+   */
+  private async handleSemanticSearch(query: string) {
+    const view = this.webviewView;
+    if (!view) return;
+    if (!this.searchController) {
+      view.webview.postMessage({
+        type: "searchError",
+        message: "语义搜索未初始化",
+      });
+      return;
+    }
+    if (!query.trim()) {
+      // 空查询：回到默认列表（前端自行处理）。
+      view.webview.postMessage({ type: "searchResults", results: [], query: "" });
+      return;
+    }
+
+    try {
+      view.webview.postMessage({ type: "searchStart", query });
+      const results = await this.searchController.search(query, {
+        onModelDownloadProgress: (file, percent) =>
+          view.webview.postMessage({ type: "modelDownloadProgress", file, percent }),
+        onIndexProgress: (processed, total) =>
+          view.webview.postMessage({ type: "indexProgress", processed, total }),
+      });
+
+      // 用 webview uri + 元数据丰富结果（任务 5.5 / 26）。
+      const enriched = [];
+      for (const r of results) {
+        const uri = vscode.Uri.file(r.filePath);
+        const stat = await statSafe(uri);
+        enriched.push({
+          path: r.filePath,
+          name: path.basename(r.filePath),
+          relativePath: vscode.workspace.asRelativePath(r.filePath),
+          uri: view.webview.asWebviewUri(uri).toString(),
+          size: stat ? toHumanSize(stat.size) : "",
+          sizeBytes: stat?.size ?? 0,
+          ext: path.extname(r.filePath).slice(1).toUpperCase(),
+          score: r.score,
+          clipScore: r.clipScore,
+          ocrScore: r.ocrScore,
+        });
+      }
+
+      view.webview.postMessage({ type: "searchResults", results: enriched, query });
+    } catch (err) {
+      error("语义搜索失败", err);
+      view.webview.postMessage({
+        type: "searchError",
+        message: err instanceof Error ? err.message : String(err),
+      });
+    }
+  }
+
+  /** 显式重建索引（命令 / 前端按钮触发）。 */
+  private async handleBuildIndex() {
+    const view = this.webviewView;
+    if (!this.searchController) return;
+    try {
+      const count = await this.searchController.buildIndex({
+        onModelDownloadProgress: (file, percent) =>
+          view?.webview.postMessage({ type: "modelDownloadProgress", file, percent }),
+        onIndexProgress: (processed, total) =>
+          view?.webview.postMessage({ type: "indexProgress", processed, total }),
+      });
+      view?.webview.postMessage({ type: "indexBuilt", count });
+      await this.sendDataToWebview();
+      vscode.window.showInformationMessage(
+        vscode.l10n.t("Asset Manage: building image index") + ` (${count})`,
+      );
+    } catch (err) {
+      error("重建图片索引失败", err);
+      view?.webview.postMessage({
+        type: "searchError",
+        message: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
 
   /**

@@ -2,5 +2,8 @@
   "Asset Manage: Please open a workspace first.": "Asset Manage: 请先打开一个工作区。",
   "Asset Manage index refreshed": "Asset Manage 索引已刷新",
   "Asset Manage activated": "Asset Manage 已激活",
-  "Open static assets panel": "打开静态资源面板"
+  "Open static assets panel": "打开静态资源面板",
+  "Asset Manage: Search Images by Description": "Asset Manage: 按描述搜索图片",
+  "Asset Manage: downloading search models": "Asset Manage: 正在下载搜索模型",
+  "Asset Manage: building image index": "Asset Manage: 正在构建图片索引"
 }

@@ -12,5 +12,15 @@
   "extension.openPanelTooltip": "Open static assets panel",
   "extension.workspaceRequired": "Asset Manage: Please open a workspace first.",
   "extension.indexRefreshed": "Asset Manage index refreshed",
-  "extension.activated": "Asset Manage activated"
+  "extension.activated": "Asset Manage activated",
+  "extension.semanticSearchCommand": "Asset Manage: Search Images by Description",
+  "extension.buildImageIndexCommand": "Asset Manage: Rebuild Image Search Index",
+  "extension.ss.enableDesc": "Enable semantic (description-based) image search.",
+  "extension.ss.ocrEnabledDesc": "Use OCR text to assist image search ranking (downloads OCR language packs on first use).",
+  "extension.ss.ocrWeightDesc": "Weight of the OCR score in the final ranking (0-1).",
+  "extension.ss.topNDesc": "Maximum number of search results to return.",
+  "extension.ss.minScoreDesc": "Minimum score for a result to be shown (0-1).",
+  "extension.ss.concurrencyDesc": "Maximum number of images indexed concurrently.",
+  "extension.ss.modelCachePathDesc": "Override the model cache directory. Empty uses the extension's global storage.",
+  "extension.ss.mirrorsDesc": "Model download hosts tried in order (e.g. huggingface.co then hf-mirror.com)."
 }

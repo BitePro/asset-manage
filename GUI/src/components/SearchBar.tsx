@@ -4,11 +4,28 @@ import { useI18n } from '../contexts/I18nContext';
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
+  mode: 'filename' | 'semantic';
+  onModeChange: (mode: 'filename' | 'semantic') => void;
+  onSemanticSearch: (value: string) => void;
+  onBuildIndex: () => void;
+  isSemanticBusy: boolean;
+  showSemanticControls: boolean;
   sortBy: 'name' | 'size-asc' | 'size-desc';
   onSortChange: (sort: 'name' | 'size-asc' | 'size-desc') => void;
 }
 
-export default function SearchBar({ value, onChange, sortBy, onSortChange }: SearchBarProps) {
+export default function SearchBar({
+  value,
+  onChange,
+  mode,
+  onModeChange,
+  onSemanticSearch,
+  onBuildIndex,
+  isSemanticBusy,
+  showSemanticControls,
+  sortBy,
+  onSortChange,
+}: SearchBarProps) {
   const { t } = useI18n();
   const [localValue, setLocalValue] = useState(value);
   const [showSortMenu, setShowSortMenu] = useState(false);
@@ -43,6 +60,10 @@ export default function SearchBar({ value, onChange, sortBy, onSortChange }: Sea
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setLocalValue(newValue);
+    if (showSemanticControls && mode === 'semantic') {
+      onChange(newValue);
+      return;
+    }
     if (timer.current) {
       clearTimeout(timer.current);
     }
@@ -59,7 +80,11 @@ export default function SearchBar({ value, onChange, sortBy, onSortChange }: Sea
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
-      onChange(localValue);
+      if (showSemanticControls && mode === 'semantic') {
+        onSemanticSearch(localValue);
+      } else {
+        onChange(localValue);
+      }
     } else if (e.key === 'Escape') {
       handleClear();
     }
@@ -78,10 +103,32 @@ export default function SearchBar({ value, onChange, sortBy, onSortChange }: Sea
 
   return (
     <div className="search-container">
+      {showSemanticControls && (
+      <div className="search-toolbar">
+        <div className="search-mode-toggle" role="group" aria-label={t('searchMode')}>
+          <button
+            className={`mode-btn ${mode === 'filename' ? 'active' : ''}`}
+            onClick={() => onModeChange('filename')}
+            type="button"
+          >
+            {t('fileSearchMode')}
+          </button>
+          <button
+            className={`mode-btn ${mode === 'semantic' ? 'active' : ''}`}
+            onClick={() => onModeChange('semantic')}
+            type="button"
+          >
+            {t('semanticSearchMode')}
+          </button>
+        </div>
+      </div>
+      )}
+
       <div className="sort-container" ref={menuRef}>
         <button 
           className={`sort-btn-wide ${showSortMenu ? 'active' : ''}`}
           onClick={toggleSortMenu}
+          disabled={showSemanticControls && mode === 'semantic'}
         >
           {getSortLabel()}
           <span className="dropdown-arrow">▼</span>
@@ -117,7 +164,7 @@ export default function SearchBar({ value, onChange, sortBy, onSortChange }: Sea
           type="text"
           id="searchInput"
           className="search-input"
-          placeholder={t('searchPlaceholder')}
+          placeholder={showSemanticControls && mode === 'semantic' ? t('semanticSearchPlaceholder') : t('searchPlaceholder')}
           value={localValue}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
@@ -134,6 +181,27 @@ export default function SearchBar({ value, onChange, sortBy, onSortChange }: Sea
           </button>
         )}
       </div>
+
+      {showSemanticControls && mode === 'semantic' && (
+        <div className="semantic-actions">
+          <button
+            className={`btn ${isSemanticBusy ? 'loading' : ''}`}
+            onClick={() => onSemanticSearch(localValue)}
+            disabled={isSemanticBusy || !localValue.trim()}
+            type="button"
+          >
+            {isSemanticBusy ? t('semanticSearching') : t('semanticSearch')}
+          </button>
+          <button
+            className="btn secondary"
+            onClick={onBuildIndex}
+            disabled={isSemanticBusy}
+            type="button"
+          >
+            {t('buildImageIndex')}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

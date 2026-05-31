@@ -26,5 +26,15 @@ test-*
 *.log
 **/*.map
 
+# 语义搜索：模型缓存与索引绝不打包（运行时下载到全局存储）
+.model-cache/**
+model-cache/**
+**/*.image-index.json
+**/.image-index.json
+image-index/**
+
+# openspec 规划文档（无需随包发布）
+openspec/**
+
 # 锁文件（可选，打包时 vsce 会安装依赖）
 pnpm-lock.yaml

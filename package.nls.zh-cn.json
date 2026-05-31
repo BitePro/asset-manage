@@ -12,5 +12,15 @@
   "extension.openPanelTooltip": "打开静态资源面板",
   "extension.workspaceRequired": "Asset Manage: 请先打开一个工作区。",
   "extension.indexRefreshed": "Asset Manage 索引已刷新",
-  "extension.activated": "Asset Manage 已激活"
+  "extension.activated": "Asset Manage 已激活",
+  "extension.semanticSearchCommand": "Asset Manage: 按描述搜索图片",
+  "extension.buildImageIndexCommand": "Asset Manage: 重建图片搜索索引",
+  "extension.ss.enableDesc": "启用语义（按描述）图片搜索。",
+  "extension.ss.ocrEnabledDesc": "使用 OCR 文本辅助图片搜索排序（首次使用时会下载 OCR 语言包）。",
+  "extension.ss.ocrWeightDesc": "OCR 分在最终排序中的权重（0-1）。",
+  "extension.ss.topNDesc": "返回的搜索结果最大数量。",
+  "extension.ss.minScoreDesc": "结果展示的最低分阈值（0-1）。",
+  "extension.ss.concurrencyDesc": "索引时并发处理图片的最大数量。",
+  "extension.ss.modelCachePathDesc": "覆盖模型缓存目录。留空则使用插件全局存储。",
+  "extension.ss.mirrorsDesc": "模型下载源（按顺序尝试，如先 huggingface.co 再 hf-mirror.com）。"
 }

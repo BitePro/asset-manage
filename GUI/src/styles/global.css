@@ -118,6 +118,53 @@
     background: var(--vscode-editor-background);
     border-bottom: 1px solid var(--vscode-panel-border);
   }
+
+  .search-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .search-mode-toggle {
+    display: inline-flex;
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--vscode-sideBar-background);
+  }
+
+  .mode-btn {
+    min-width: 74px;
+    padding: 5px 9px;
+    border: 0;
+    border-right: 1px solid var(--vscode-panel-border);
+    background: transparent;
+    color: var(--vscode-foreground);
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .mode-btn:last-child {
+    border-right: 0;
+  }
+
+  .mode-btn.active {
+    background: var(--vscode-list-activeSelectionBackground);
+    color: var(--vscode-list-activeSelectionForeground);
+  }
+
+  .semantic-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .semantic-actions .btn {
+    flex: 1;
+    min-width: 0;
+  }
   
   .search-wrapper {
     position: relative;
@@ -185,6 +232,15 @@
     font-size: 12px;
     color: var(--vscode-descriptionForeground);
     min-height: 16px;
+  }
+
+  .sort-container {
+    margin-bottom: 8px;
+  }
+
+  .sort-btn-wide:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
   
   /* Buttons */
@@ -353,7 +409,51 @@
     right: 5px;
     width: 100%;
     display: flex;
+    gap: 4px;
     justify-content: flex-end;
+}
+
+.semantic-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 6px;
+  background: var(--vscode-sideBar-background);
+}
+
+.semantic-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.semantic-subtitle {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  word-break: break-word;
+}
+
+.semantic-error {
+  margin-bottom: 14px;
+  padding: 9px 10px;
+  border-left: 3px solid var(--vscode-errorForeground);
+  background: var(--vscode-inputValidation-errorBackground);
+  color: var(--vscode-errorForeground);
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.semantic-empty {
+  margin-top: 16px;
+}
+
+.badge.semantic-score {
+  background: var(--vscode-charts-green);
+  color: var(--vscode-editor-background);
 }
 
 .card:hover {
@@ -883,8 +983,9 @@
 /* 排序控制 */
 .search-container {
   display: flex;
+  flex-direction: column;
   gap: 12px;
-  align-items: center;
+  align-items: stretch;
   padding: 12px 16px;
   background: var(--vscode-editor-background);
   border-bottom: 1px solid var(--vscode-panel-border);
@@ -1059,6 +1160,11 @@
   align-items: center;
   justify-content: center;
   background: var(--vscode-button-background);
+}
+
+.badge.semantic-score {
+  background: var(--vscode-charts-green);
+  color: var(--vscode-editor-background);
 }
 
 .badge.duplicate.static {

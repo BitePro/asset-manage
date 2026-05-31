@@ -15,11 +15,22 @@ declare global {
 export type MessageToExtension =
   | { type: 'refresh' }
   | { type: 'reveal'; path: string }
-  | { type: 'openFile'; path: string };
+  | { type: 'openFile'; path: string }
+  | { type: 'semanticSearch'; query: string }
+  | { type: 'buildIndex' }
+  | { type: 'cancelSearch' };
 
 export type MessageFromExtension =
   | { type: 'refreshDone' }
-  | { type: 'previewFont'; fileName: string };
+  | { type: 'previewFont'; fileName: string }
+  | { type: 'enterSemanticSearch' }
+  | { type: 'searchStart'; query: string }
+  | { type: 'searchResults'; query: string; results: ImageFile[] }
+  | { type: 'indexProgress'; processed: number; total: number }
+  | { type: 'indexBuilt'; count: number }
+  | { type: 'modelDownloadProgress'; file: string; percent: number }
+  | { type: 'searchError'; message: string }
+  | { type: 'searchCancelled' };
 
 // 资源类型定义
 export interface AssetFile {
@@ -43,6 +54,9 @@ export interface FontFile extends AssetFile {
 
 export interface ImageFile extends AssetFile {
   uri: string;
+  score?: number;
+  clipScore?: number;
+  ocrScore?: number;
 }
 
 export interface MediaFile extends AssetFile {
